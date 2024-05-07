@@ -9,11 +9,23 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Character.cpp \
+    enemy.cpp \
+    heartcrystal.cpp \
+    item.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    player.cpp \
+    room.cpp
 
 HEADERS += \
-    mainwindow.h
+    Character.h \
+    enemy.h \
+    heartcrystal.h \
+    item.h \
+    mainwindow.h \
+    player.h \
+    room.h
 
 FORMS += \
     mainwindow.ui
