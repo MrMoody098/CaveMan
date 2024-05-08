@@ -18,10 +18,11 @@ public:
     void addCoins(int);
     void incCoins(int);
     int getCoins();
+    std::vector<Item*> items;
+
 protected:
     int health;
     int coins;
     int heartCrystalCount;
-    std::vector<Item*> items;
 };
 #endif // CHARACTER_H

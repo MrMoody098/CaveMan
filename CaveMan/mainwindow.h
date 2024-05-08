@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <room.h>
 #include <player.h>
+#include <heartcrystal.h>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -20,7 +21,8 @@ public:
 private slots:
     void appendText(const QString &text, int delay);
     void handleSelectedItemChanged(QListWidgetItem *item);
-
+    void updateList();
+    void handleUseButtonClicked();
 private:
     Ui::MainWindow *ui;
     QTimer *timer;
@@ -28,6 +30,7 @@ private:
     int currentIndex;
     Room currentRoom;
     Player player;
+    HeartCrystal heartCrystal;
 };
 
 #endif // MAINWINDOW_H

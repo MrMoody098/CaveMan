@@ -1,6 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+#include"heartcrystal.h"
+
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    player(),
+    heartCrystal(player) {
     ui->setupUi(this);
 
     // Make the QTextEdit widget read-only
@@ -12,23 +18,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                 "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
     // Call the appendText function with the intro text
     player.setHealth(10);
-    appendText(introText,30);
+    appendText(introText,10);
     QString health = QString::number(player.getHealth());
     QString coins = QString::number(player.getCoins());
     ui->Health->setText(health);
     ui->Coins->setText(coins);
-
-
+    HeartCrystal* hc = &heartCrystal;
+    hc->setValues(1,8,8);
+    player.addItem(hc);
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
 
     // Add items to the listWidget
-    ui->PlayerList->addItem("Item 1");
-    ui->PlayerList->addItem("Item 2");
-    ui->PlayerList->addItem("Item 3");
+    ui->PlayerList->addItem("HeartCrystal x"+QString::number(hc->getQuantity()));
+    ui->PlayerList->addItem("Coins");
+    ui->PlayerList->addItem("SkipStones");
+    heartCrystal.use();
+    ui->Health->setText(health);
 
     // Connect itemClicked signal to a slot for handling item selection changes
     connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::handleSelectedItemChanged);
+    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::handleUseButtonClicked);
 }
 
 MainWindow::~MainWindow()
@@ -37,9 +47,19 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::handleSelectedItemChanged(QListWidgetItem *item)
-{
-    // Handle item selection changes here
-    qDebug() << "Selected item:" << item->text();
+ {
+    if(item->text().contains("HeartCrystal"))
+    {
+        ui->UseButton->setStyleSheet("background-color: red; color: white;");
+    }
+
+    else
+    {
+        // Reset the color of the UseButton to its default
+        ui->UseButton->setStyleSheet("");
+        // Other actions you want to perform when another item is selected
+    };
+
 }
 
 //This Method is used to append Text Character By Character
@@ -71,3 +91,32 @@ void MainWindow::appendText(const QString &text, int delay) {
     // Start the QTimer with the specified delay
     timer->start(delay);
 }
+
+void MainWindow::updateList(){
+    ui->PlayerList->clear();
+    HeartCrystal* hc = &heartCrystal;
+    // Add items to the listWidget
+    ui->PlayerList->addItem("HeartCrystal x"+QString::number(hc->getQuantity()));
+    ui->PlayerList->addItem("Coins");
+    ui->PlayerList->addItem("SkipStones");
+}
+
+void MainWindow::handleUseButtonClicked()
+{
+    // Check if the HeartCrystal is selected in the list
+    QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
+    if(selectedItem && selectedItem->text().contains("HeartCrystal"))
+    {
+        // Use the HeartCrystal
+        heartCrystal.use();
+
+        // Update the player's health displayed in the UI
+        QString health = QString::number(player.getHealth());
+        ui->Health->setText(health);
+
+        // Handle item selection changes
+        qDebug() << "Selected item:" << selectedItem->text();
+        updateList();
+    }
+}
+
