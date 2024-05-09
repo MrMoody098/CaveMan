@@ -5970,6 +5970,16 @@
       <string>West</string>
      </property>
     </widget>
+    <widget class="QTextEdit" name="CurrentRoom">
+     <property name="geometry">
+      <rect>
+       <x>470</x>
+       <y>10</y>
+       <width>104</width>
+       <height>85</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

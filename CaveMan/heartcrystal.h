@@ -3,9 +3,10 @@
 
 #include "item.h"
 #include "player.h"
+
 // Definition of BitStructure
 
-class HeartCrystal : public Item {
+class HeartCrystal : public Item  {
 public:
     // Constructor
     HeartCrystal(Player& player);

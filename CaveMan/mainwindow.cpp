@@ -1,14 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include"heartcrystal.h"
+#include "heartcrystal.h"
 #include <QLabel>
 #include <QPixmap>
-
+using namespace std;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     player(),
-    heartCrystal(player) {
+    heartCrystal(player),
+    currentRoom(nullptr) { // Initialize currentRoom pointer to nullptr
     ui->setupUi(this);
 
     // Load the map image
@@ -26,33 +27,89 @@ MainWindow::MainWindow(QWidget *parent)
                 "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
                 "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
 
-    Room roomA,roomB,roomC,roomD,roomE,roomF,roomG,roomH,roomI,roomJ,roomK,roomL,roomM,roomN;
-    roomA.setExits(nullptr,nullptr,&roomB,nullptr);
-    roomB.setExits(&roomA,nullptr,&roomC,nullptr);
-    roomC.setExits(&roomB,&roomF,&roomE,&roomD);
-    roomD.setExits(nullptr,&roomC,nullptr,nullptr);
-    roomE.setExits(&roomC,&roomL,nullptr,nullptr);
-    roomF.setExits(nullptr,nullptr,&roomG,&roomC);
+    // Initialize current room to point to roomA
+
+    // Create rooms dynamically
+    Room* roomA = new Room("A");
+    Room* roomB = new Room("B");
+    Room* roomC = new Room("C");
+    Room* roomD = new Room("D");
+    Room* roomE = new Room("E");
+    Room* roomF = new Room("F");
+    Room* roomG = new Room("G");
+    Room* roomH = new Room("H");
+    Room* roomI = new Room("I");
+    Room* roomJ = new Room("J");
+    Room* roomK = new Room("K");
+    Room* roomL = new Room("L");
+    Room* roomM = new Room("M");
+    Room* roomN = new Room("N");
+
+
+
+
+
+
+
+    currentRoom = roomA;
+    // Set exits for each room
+    roomA->setExits(nullptr, nullptr, roomB, nullptr);
+    roomB->setExits(roomA, nullptr, roomC, nullptr);
+    roomC->setExits(roomB, roomF, roomE, roomD);
+    roomD->setExits(nullptr, roomC, nullptr, nullptr);
+    roomE->setExits(roomC, nullptr, nullptr, nullptr);
+    roomF->setExits(nullptr, nullptr, roomG, roomC);
+    roomG->setExits(roomF, roomH, nullptr, nullptr);
+    roomH->setExits(roomI, roomJ, roomG, nullptr);
+    roomI->setExits(nullptr, nullptr, roomH, nullptr);
+    roomJ->setExits(nullptr, roomM, roomK, roomH);
+    roomK->setExits(roomJ,nullptr,roomK,nullptr);
+    roomL->setExits(roomK,nullptr,nullptr,roomE);
+    roomM->setExits(roomJ,nullptr,roomN,nullptr);
+
+
+
+
+    // Connect signals and slots
+    connect(ui->NorthButton, &QPushButton::clicked, this, [this]() {
+        if (goDirection("NORTH")) {
+            updateCurrentRoom();
+        }
+    });
+
+    connect(ui->SouthButton, &QPushButton::clicked, this, [this]() {
+        if (goDirection("SOUTH")) {
+            updateCurrentRoom();
+        }
+    });
+
+    connect(ui->EastButton, &QPushButton::clicked, this, [this]() {
+        if (goDirection("EAST")) {
+            updateCurrentRoom();
+        }
+    });
+
+    connect(ui->WestButton, &QPushButton::clicked, this, [this]() {
+        if (goDirection("WEST")) {
+            updateCurrentRoom();
+        }
+    });
 
     // Call the appendText function with the intro text
     player.setHealth(10);
-    appendText(introText,10);
-    QString health = QString::number(player.getHealth());
-    QString coins = QString::number(player.getCoins());
-    ui->Health->setText(health);
-    ui->Coins->setText(coins);
+    player.addCoins(1);
+    appendText(introText, 10);
+    updateStats();
     HeartCrystal* hc = &heartCrystal;
-    hc->setValues(1,8,8);
+    hc->setValues(1, 8, 8);
     player.addItem(hc);
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
 
     // Add items to the listWidget
-    ui->PlayerList->addItem("HeartCrystal x"+QString::number(hc->getQuantity()));
-    ui->PlayerList->addItem("Coins");
+    ui->PlayerList->addItem("HeartCrystal x" + QString::number(hc->getQuantity()));
     ui->PlayerList->addItem("SkipStones");
     heartCrystal.use();
-    ui->Health->setText(health);
 
     // Connect itemClicked signal to a slot for handling item selection changes
     connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::handleSelectedItemChanged);
@@ -66,7 +123,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::handleSelectedItemChanged(QListWidgetItem *item)
 {
-    if(item->text().contains("HeartCrystal"))
+    if(item->text().contains("HeartCrystal") )
+    {
+        ui->UseButton->setStyleSheet("background-color: red; color: white;");
+    }
+
+    else if(item->text().contains("SkipStone") )
     {
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
     }
@@ -115,9 +177,61 @@ void MainWindow::updateList(){
     HeartCrystal* hc = &heartCrystal;
     // Add items to the listWidget
     ui->PlayerList->addItem("HeartCrystal x"+QString::number(hc->getQuantity()));
-    ui->PlayerList->addItem("Coins");
     ui->PlayerList->addItem("SkipStones");
 }
+
+void MainWindow::updateStats(){
+    QString health = QString::number(player.getHealth());
+    QString coins = QString::number(player.getCoins());
+    ui->Health->setText(health);
+    ui->Coins->setText(coins);
+
+}
+
+void MainWindow::updateCurrentRoom() {
+    if (currentRoom != nullptr) {
+        ui->CurrentRoom->setText(currentRoom->getName());
+    } else {
+        qDebug() << "Current room is null!";
+    }
+}
+
+bool MainWindow::goDirection(QString direction) {
+    qDebug() << "Direction: " << direction;
+    if (currentRoom == nullptr) {
+        qDebug() << "Current room is null!";
+        return false;
+    }
+
+    Room* nextRoom = nullptr;
+
+    if (direction == "NORTH" && currentRoom->getNorth() != nullptr) {
+        nextRoom = currentRoom->getNorth();
+        qDebug() << "Next room to the NORTH exists.";
+    } else if (direction == "SOUTH" && currentRoom->getSouth() != nullptr) {
+        nextRoom = currentRoom->getSouth();
+        qDebug() << "Next room to the SOUTH exists.";
+    } else if (direction == "EAST" && currentRoom->getEast() != nullptr) {
+        nextRoom = currentRoom->getEast();
+        qDebug() << "Next room to the EAST exists.";
+    } else if (direction == "WEST" && currentRoom->getWest() != nullptr) {
+        nextRoom = currentRoom->getWest();
+        qDebug() << "Next room to the WEST exists.";
+    } else {
+        qDebug() << "No valid exit in the specified direction or current room is null.";
+    }
+
+    if (nextRoom != nullptr) {
+        currentRoom = nextRoom;
+        updateCurrentRoom(); // Update the UI to display the new current room
+        return true; // Return true to indicate successful direction change
+    } else {
+        qDebug() << "Cannot move in the specified direction.";
+    }
+
+    return false; // Return false if the direction change was unsuccessful
+}
+
 
 void MainWindow::handleUseButtonClicked()
 {
@@ -127,11 +241,7 @@ void MainWindow::handleUseButtonClicked()
     {
         // Use the HeartCrystal
         heartCrystal.use();
-
-        // Update the player's health displayed in the UI
-        QString health = QString::number(player.getHealth());
-        ui->Health->setText(health);
-
+        updateStats();
         // Handle item selection changes
         qDebug() << "Selected item:" << selectedItem->text();
         updateList();

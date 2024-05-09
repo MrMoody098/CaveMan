@@ -1,5 +1,5 @@
 #include "heartcrystal.h"
-
+#include "consumable.h"
 // Constructor implementation
 HeartCrystal::HeartCrystal(Player& player) : Item(5, "Gives Player +1 HP","HeartCrystal",1), player(player) {
     isConsumable();

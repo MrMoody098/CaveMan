@@ -1,5 +1,11 @@
 // #ifndef INVENTORY_H
 // #define INVENTORY_H
+// #include "heartcrystal.h"
+
+// union Slot{
+//     HeartCrystal heartCrystal;
+
+// };
 
 // template<typename T>
 // class Inventory

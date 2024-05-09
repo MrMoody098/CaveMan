@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QPixmap>
 #include <heartcrystal.h>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -25,12 +26,15 @@ private slots:
     void handleSelectedItemChanged(QListWidgetItem *item);
     void updateList();
     void handleUseButtonClicked();
+    void updateStats();
+    bool goDirection(QString direction);
+    void updateCurrentRoom();
+
 private:
     Ui::MainWindow *ui;
-    QTimer *timer;
     QString introText;
     int currentIndex;
-    Room currentRoom;
+    Room* currentRoom;
     Player player;
     HeartCrystal heartCrystal;
     QLabel *imageLabel = new QLabel(this);
@@ -38,3 +42,4 @@ private:
 };
 
 #endif // MAINWINDOW_H
+

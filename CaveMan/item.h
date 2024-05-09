@@ -4,8 +4,8 @@
 #include <QMainWindow>
 
 struct BitStructure {
-    int quantity: 3; // store up to 8 in quantity
-    int value: 3;    // store our value of 8
+    int quantity: 3; // store up to 7 in quantity
+    int value: 4;    // store our value of 15
     int isConsumable: 1; // stores isConsumable check
 };
 
