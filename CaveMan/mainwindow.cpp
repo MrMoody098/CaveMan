@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include"heartcrystal.h"
+#include <QLabel>
+#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -9,13 +11,29 @@ MainWindow::MainWindow(QWidget *parent)
     heartCrystal(player) {
     ui->setupUi(this);
 
+    // Load the map image
+    QPixmap image("C:/Users/ticta/OneDrive/Desktop/CaveManMap.png");
+
+    // Set the scaled image to the QLabel
+    ui->Map_2->setPixmap(image.scaled(ui->Map_2->size(), Qt::KeepAspectRatio));
+
     // Make the QTextEdit widget read-only
     ui->OutputBox->setReadOnly(true);
+
     // Initialize intro text and other variables
     introText = "Welcome to CaveMan's Descent!\n\n"
                 "CaveMan, a fearless explorer of caves, finds himself plunging into darkness after slipping down a mineshaft during one of his usual adventures.\n\n"
                 "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
                 "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
+
+    Room roomA,roomB,roomC,roomD,roomE,roomF,roomG,roomH,roomI,roomJ,roomK,roomL,roomM,roomN;
+    roomA.setExits(nullptr,nullptr,&roomB,nullptr);
+    roomB.setExits(&roomA,nullptr,&roomC,nullptr);
+    roomC.setExits(&roomB,&roomF,&roomE,&roomD);
+    roomD.setExits(nullptr,&roomC,nullptr,nullptr);
+    roomE.setExits(&roomC,&roomL,nullptr,nullptr);
+    roomF.setExits(nullptr,nullptr,&roomG,&roomC);
+
     // Call the appendText function with the intro text
     player.setHealth(10);
     appendText(introText,10);
@@ -47,7 +65,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::handleSelectedItemChanged(QListWidgetItem *item)
- {
+{
     if(item->text().contains("HeartCrystal"))
     {
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
@@ -119,4 +137,3 @@ void MainWindow::handleUseButtonClicked()
         updateList();
     }
 }
-

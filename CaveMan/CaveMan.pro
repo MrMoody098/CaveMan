@@ -12,6 +12,7 @@ SOURCES += \
     Character.cpp \
     enemy.cpp \
     heartcrystal.cpp \
+    inventory.cpp \
     item.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -22,6 +23,7 @@ HEADERS += \
     Character.h \
     enemy.h \
     heartcrystal.h \
+    inventory.h \
     item.h \
     mainwindow.h \
     player.h \
@@ -34,3 +36,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    ../../../OneDrive/Desktop/CaveManMap.png

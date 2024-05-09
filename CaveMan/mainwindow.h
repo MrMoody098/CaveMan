@@ -6,6 +6,8 @@
 #include <QTimer>
 #include <room.h>
 #include <player.h>
+#include <QLabel>
+#include <QPixmap>
 #include <heartcrystal.h>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -31,6 +33,8 @@ private:
     Room currentRoom;
     Player player;
     HeartCrystal heartCrystal;
+    QLabel *imageLabel = new QLabel(this);
+
 };
 
 #endif // MAINWINDOW_H
