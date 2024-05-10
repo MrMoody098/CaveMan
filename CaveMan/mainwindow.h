@@ -22,13 +22,20 @@ public:
     ~MainWindow();
 
 private slots:
-    void appendText(const QString &text, int delay);
-    void handleSelectedItemChanged(QListWidgetItem *item);
-    void updateList();
-    void handleUseButtonClicked();
-    void updateStats();
     bool goDirection(QString direction);
+
+
+    void appendText(const QString &text, int delay);
+
+    //update Ui methods
+    void updatePlayerItemList();
+    void updateRoomItemList();
+    void updateStats();
     void updateCurrentRoom();
+
+    //button handlers
+    void SelectedItemChanged(QListWidgetItem *item);
+    void UseButtonClicked();
 
 private:
     Ui::MainWindow *ui;

@@ -10,10 +10,8 @@ CONFIG += c++17
 
 SOURCES += \
     Character.cpp \
-    consumable.cpp \
     enemy.cpp \
     heartcrystal.cpp \
-    inventory.cpp \
     item.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -23,10 +21,8 @@ SOURCES += \
 
 HEADERS += \
     Character.h \
-    consumable.h \
     enemy.h \
     heartcrystal.h \
-    inventory.h \
     item.h \
     mainwindow.h \
     player.h \

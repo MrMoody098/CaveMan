@@ -1,3 +1,20 @@
-// #include "skipstone.h"
+#include "skipstone.h"
+// Constructor implementation
+SkipStone::SkipStone(Player& player) : Item(5, "Gives Player +1 HP","HeartCrystal",1,2,1), player(player) {
 
-// SkipStone::SkipStone() : Item(2,"allows player to skip a fight","SkipStone",1) {}
+}
+
+// Override the use function implementation
+void SkipStone::use() {
+    // when there is a SkipStone in invetory
+    if(bitStruct.quantity>0) {
+        //SKIP FIGHT/WIN AUTOMATICALLY
+
+        //Decrement qunatity
+        bitStruct.quantity-=1;
+
+    }
+}
+
+
+Player& SkipStone::getPlayer(){return player;}

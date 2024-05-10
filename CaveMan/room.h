@@ -4,8 +4,7 @@
 #include <QString>
 #include <vector> // Include vector header for std::vector
 #include <item.h> // Forward declaration of Item class
-#include <Character.h> // Forward declaration of Character class
-
+#include "enemy.h"
 class Room
 {
 public:
@@ -13,8 +12,13 @@ public:
     const QString getName();
     const QString getDescription();
     void setExits(Room* North, Room* East, Room* South, Room* West);
-    std::vector<Item> getItemsInRoom();
-    std::vector<Character> getCharsInRoom();
+    bool enemyInRoom();
+    Item* getItem(int id);
+    int getNumItems();
+    void setEnemy(Enemy* enemy);
+    Enemy* getEnemy();
+    void addItem(Item* newItem);
+    std::vector<Item*> getItems();
     Room* getNorth();
     Room* getSouth();
     Room* getEast();
@@ -31,8 +35,8 @@ private:
     Room* East;
     Room* South;
     Room* West;
-    std::vector<Item> itemList;
-    std::vector<Character> characterList;
+    std::vector<Item*> items;
+    Enemy* enemy;
 };
 
 #endif // ROOM_H

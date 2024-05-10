@@ -18,11 +18,13 @@ public:
     void addCoins(int);
     void incCoins(int);
     int getCoins();
-    std::vector<Item*> items;
-
+    Item* getItem(int id);
+    std::vector<Item*> getItems();
 protected:
     int health;
     int coins;
     int heartCrystalCount;
+    std::vector<Item*> items;
+
 };
 #endif // CHARACTER_H

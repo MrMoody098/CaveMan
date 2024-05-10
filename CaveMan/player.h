@@ -5,6 +5,9 @@ class Player : public Character
 {
 public:
     Player();
+
+private:
+
 };
 
 #endif // PLAYER_H

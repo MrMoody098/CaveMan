@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     heartCrystal(player),
     currentRoom(nullptr) { // Initialize currentRoom pointer to nullptr
     ui->setupUi(this);
+    //add a pointer to the heartCrystal
 
     // Load the map image
     QPixmap image("C:/Users/ticta/OneDrive/Desktop/CaveManMap.png");
@@ -57,16 +58,16 @@ MainWindow::MainWindow(QWidget *parent)
     roomB->setExits(roomA, nullptr, roomC, nullptr);
     roomC->setExits(roomB, roomF, roomE, roomD);
     roomD->setExits(nullptr, roomC, nullptr, nullptr);
-    roomE->setExits(roomC, nullptr, nullptr, nullptr);
+    roomE->setExits(roomC, roomL, nullptr, nullptr);
     roomF->setExits(nullptr, nullptr, roomG, roomC);
     roomG->setExits(roomF, roomH, nullptr, nullptr);
     roomH->setExits(roomI, roomJ, roomG, nullptr);
     roomI->setExits(nullptr, nullptr, roomH, nullptr);
     roomJ->setExits(nullptr, roomM, roomK, roomH);
-    roomK->setExits(roomJ,nullptr,roomK,nullptr);
+    roomK->setExits(roomJ,nullptr,roomL,nullptr);
     roomL->setExits(roomK,nullptr,nullptr,roomE);
     roomM->setExits(roomJ,nullptr,roomN,nullptr);
-
+    roomN->setExits(roomM,nullptr,nullptr,nullptr);
 
 
 
@@ -103,17 +104,16 @@ MainWindow::MainWindow(QWidget *parent)
     HeartCrystal* hc = &heartCrystal;
     hc->setValues(1, 8, 8);
     player.addItem(hc);
+    updatePlayerItemList();
+    currentRoom->addItem(new HeartCrystal(player));
+    updateRoomItemList();
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    // Add items to the listWidget
-    ui->PlayerList->addItem("HeartCrystal x" + QString::number(hc->getQuantity()));
-    ui->PlayerList->addItem("SkipStones");
-    heartCrystal.use();
 
     // Connect itemClicked signal to a slot for handling item selection changes
-    connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::handleSelectedItemChanged);
-    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::handleUseButtonClicked);
+    connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::SelectedItemChanged);
+    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::UseButtonClicked);
 }
 
 MainWindow::~MainWindow()
@@ -121,7 +121,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::handleSelectedItemChanged(QListWidgetItem *item)
+void MainWindow::SelectedItemChanged(QListWidgetItem *item)
 {
     if(item->text().contains("HeartCrystal") )
     {
@@ -172,12 +172,22 @@ void MainWindow::appendText(const QString &text, int delay) {
     timer->start(delay);
 }
 
-void MainWindow::updateList(){
+void MainWindow::updateRoomItemList(){
+    ui->RoomList->clear();
+    for(Item* i:currentRoom->getItems()){
+        QString name = i->getName();
+        QString quantity = QString::number(i->getQuantity());
+        ui->RoomList->addItem(name+" x"+quantity);
+    }
+}
+
+void MainWindow::updatePlayerItemList(){
     ui->PlayerList->clear();
-    HeartCrystal* hc = &heartCrystal;
-    // Add items to the listWidget
-    ui->PlayerList->addItem("HeartCrystal x"+QString::number(hc->getQuantity()));
-    ui->PlayerList->addItem("SkipStones");
+    for(Item* i:player.getItems()){
+        QString name = i->getName();
+        QString quantity = QString::number(i->getQuantity());
+        ui->PlayerList->addItem(name+" x"+quantity);
+    }
 }
 
 void MainWindow::updateStats(){
@@ -223,7 +233,8 @@ bool MainWindow::goDirection(QString direction) {
 
     if (nextRoom != nullptr) {
         currentRoom = nextRoom;
-        updateCurrentRoom(); // Update the UI to display the new current room
+        updateCurrentRoom();        // Update the UI to display the new current room
+        updateRoomItemList();
         return true; // Return true to indicate successful direction change
     } else {
         qDebug() << "Cannot move in the specified direction.";
@@ -233,17 +244,19 @@ bool MainWindow::goDirection(QString direction) {
 }
 
 
-void MainWindow::handleUseButtonClicked()
+
+
+void MainWindow::UseButtonClicked()
 {
     // Check if the HeartCrystal is selected in the list
     QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
     if(selectedItem && selectedItem->text().contains("HeartCrystal"))
     {
         // Use the HeartCrystal
-        heartCrystal.use();
+        player.getItem(1)->use();
         updateStats();
         // Handle item selection changes
         qDebug() << "Selected item:" << selectedItem->text();
-        updateList();
+        updatePlayerItemList();
     }
 }

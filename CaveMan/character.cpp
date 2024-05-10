@@ -21,9 +21,19 @@ void Character::subtractHealth(int amount) {
     }
 }
 
+Item* Character::getItem(int id){
+    for(Item* i:items){
+        if (i->getId() ==id){
+            return i;
+        }
+    }
+    //return 0 if item was not found
+    return 0;
+}
 
 void Character::addItem(Item* newItem) {
-    items.push_back(newItem);
+    if(getItem(newItem->getId())){ getItem(newItem->getId())->incQuantity(); }
+    else{ items.push_back(newItem); };
 }
 
 int Character::getNumItems() {
@@ -37,3 +47,7 @@ void Character::addCoins(int coins){
 int Character::getCoins(){
     return coins;
 }
+std::vector<Item*> Character:: getItems(){
+    return items;
+}
+
