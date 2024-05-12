@@ -3,6 +3,7 @@
 #include "heartcrystal.h"
 #include <QLabel>
 #include <QPixmap>
+#include "skipstone.h"
 using namespace std;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -33,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
     // Create rooms dynamically
     Room* roomA = new Room("A");
     Room* roomB = new Room("B");
+    roomB->setDescription("A dusty hallway");
+    roomB->addItem(new SkipStone(player));
     Room* roomC = new Room("C");
     Room* roomD = new Room("D");
     Room* roomE = new Room("E");
@@ -106,6 +109,7 @@ MainWindow::MainWindow(QWidget *parent)
     player.addItem(hc);
     updatePlayerItemList();
     currentRoom->addItem(new HeartCrystal(player));
+    currentRoom->addItem(new HeartCrystal(player));
     updateRoomItemList();
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -149,7 +153,7 @@ void MainWindow::appendText(const QString &text, int delay) {
 
     // used to keep track of current character index
     currentIndex = 0;
-
+    ui->OutputBox->insertPlainText("\n");
     // Connect the timeout signal of the QTimer to a lambda function
     connect(timer, &QTimer::timeout, [=]() {
         // Check if currentIndex is within the text length
@@ -235,6 +239,7 @@ bool MainWindow::goDirection(QString direction) {
         currentRoom = nextRoom;
         updateCurrentRoom();        // Update the UI to display the new current room
         updateRoomItemList();
+        appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
         return true; // Return true to indicate successful direction change
     } else {
         qDebug() << "Cannot move in the specified direction.";

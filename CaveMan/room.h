@@ -27,6 +27,7 @@ public:
     void addItem(Item item);
     void removeItem(Item* item);
     void setDescription(QString description);
+    QString itemListToQString();
 
 private:
     QString description;

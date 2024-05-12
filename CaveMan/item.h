@@ -15,6 +15,8 @@ class Item
 public:
     // Constructor
     Item( int value,QString description,QString name,int quantity,int id,int isConsumable);
+    //Release Memeory using descturctor
+
     int getValue();
     int getDescription;
     int getQuantity();

@@ -1,5 +1,4 @@
 #include "room.h"
-
 //we set the exit pointers to null so were not pointing to any random memeory address
 Room::Room(QString name) : name(name), North(nullptr), East(nullptr), South(nullptr), West(nullptr) {}
 
@@ -23,6 +22,16 @@ std::vector<Item*> Room::getItems()
 {
     // Return the items in the room
     return items;
+}
+
+QString Room::itemListToQString(){
+    QString listToString=" in the room there is a ";
+    if(items.empty()){}
+
+    for (Item* item : items){
+        listToString += (item->getName()+" ");
+    };
+    return listToString;
 }
 
 Item* Room::getItem(int id){

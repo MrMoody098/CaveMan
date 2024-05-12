@@ -46,6 +46,7 @@ private:
     HeartCrystal heartCrystal;
     QLabel *imageLabel = new QLabel(this);
 
+
 };
 
 #endif // MAINWINDOW_H
