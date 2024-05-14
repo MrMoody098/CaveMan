@@ -146,6 +146,8 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
         qDebug() << item->text() ;
         // Reset the color of the UseButton to its default
         ui->UseButton->setStyleSheet("");
+        ui->DropButton->setStyleSheet("");
+
     }
 
     else if(item->text().contains("SkipStone") )
@@ -155,6 +157,8 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
 
         // Reset the color of the UseButton to its default
         ui->UseButton->setStyleSheet("");
+        ui->DropButton->setStyleSheet("");
+
     }
 
     else
@@ -162,6 +166,8 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
         // Reset the color of both buttons to their default
         ui->PickupButton->setStyleSheet("");
         ui->UseButton->setStyleSheet("");
+        ui->DropButton->setStyleSheet("");
+
     };
 }
 
@@ -341,21 +347,27 @@ void MainWindow::DropButtonClicked()
         {
             // Retrieve the item's name
             QString itemName = selectedItem->text();
+            int itemId=0;
+            if(itemName.contains("HeartCrystal")){itemId=1;};
+            if(itemName.contains("SkipStone")){itemId=2;};
 
             // Check if the selected item is a HeartCrystal
-            if(itemName.contains("HeartCrystal"))
+            if(itemId!=0)
             {
                 //if room has a heartCrystal inc room heart crystal and dec player heartCrystal
-                if(currentRoom->getItem(1)){
-
-                    currentRoom->getItem(1)->incQuantity();
-                    player.getItem(1)->decQuantity();
+                if(currentRoom->getItem(itemId)){
+                    if(player.getItem(itemId)->getQuantity()==0){return;}
+                    currentRoom->getItem(itemId)->incQuantity();
+                    player.getItem(itemId)->decQuantity();
                 }
                 //else dec player heartCrystal by one and add a new heartCrystal object into the room
                 else{
+                    if(player.getItem(itemId)->getQuantity()==0){return;}
 
-                    player.getItem(1)->decQuantity();
-                    currentRoom->addItem(new HeartCrystal(player));
+                        player.getItem(itemId)->decQuantity();
+                        if(itemId=1){currentRoom->addItem(new HeartCrystal(player));};
+                        if(itemId=2){currentRoom->addItem(new SkipStone(player));};
+
                 }
             }
         }
