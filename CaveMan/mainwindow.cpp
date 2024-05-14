@@ -356,7 +356,8 @@ void MainWindow::DropButtonClicked()
             {
                 //if room has a heartCrystal inc room heart crystal and dec player heartCrystal
                 if(currentRoom->getItem(itemId)){
-                    if(player.getItem(itemId)->getQuantity()==0){return;}
+                if(player.getItem(itemId)->getQuantity()==0){return;}
+
                     currentRoom->getItem(itemId)->incQuantity();
                     player.getItem(itemId)->decQuantity();
                 }
@@ -365,8 +366,8 @@ void MainWindow::DropButtonClicked()
                     if(player.getItem(itemId)->getQuantity()==0){return;}
 
                         player.getItem(itemId)->decQuantity();
-                        if(itemId=1){currentRoom->addItem(new HeartCrystal(player));};
-                        if(itemId=2){currentRoom->addItem(new SkipStone(player));};
+                        if(itemId==1){currentRoom->addItem(new HeartCrystal(player));};
+                        if(itemId==2){currentRoom->addItem(new SkipStone(player));};
 
                 }
             }
