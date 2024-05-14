@@ -88,6 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::UseButtonClicked);
 
+    connect(ui->DropButton, &QPushButton::clicked, this, &MainWindow::DropButtonClicked);
+
     connect(ui->NorthButton, &QPushButton::clicked, this, [this]() {
         if (goDirection("NORTH")) {
             updateCurrentRoom();
@@ -168,13 +170,16 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
     if(item->text().contains("HeartCrystal") )
     {
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
+        ui->DropButton->setStyleSheet("background-color: red; color: white;");
         // Reset the color of the PickupButton to its default
         ui->PickupButton->setStyleSheet("");
+
     }
 
     else if(item->text().contains("SkipStone") )
     {
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
+        ui->DropButton->setStyleSheet("background-color: red; color: white;");
         // Reset the color of the PickupButton to its default
         ui->PickupButton->setStyleSheet("");
     }
@@ -188,8 +193,10 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
 }
 
 
-//This Method is used to append Text Character By Character
 void MainWindow::appendText(const QString &text, int delay) {
+    // Disable buttons while displaying intro text
+    setButtonsEnabled(false);
+
     // Create a QTimer object
     QTimer *timer = new QTimer(this);
 
@@ -211,11 +218,23 @@ void MainWindow::appendText(const QString &text, int delay) {
 
             // Delete timer to clean up resources
             timer->deleteLater();
+
+            // Re-enable buttons after text display
+            setButtonsEnabled(true);
         }
     });
 
     // Start the QTimer with the specified delay
     timer->start(delay);
+}
+
+void MainWindow::setButtonsEnabled(bool enabled) {
+    ui->NorthButton->setEnabled(enabled);
+    ui->SouthButton->setEnabled(enabled);
+    ui->EastButton->setEnabled(enabled);
+    ui->WestButton->setEnabled(enabled);
+    ui->PickupButton->setEnabled(enabled);
+    ui->UseButton->setEnabled(enabled);
 }
 
 void MainWindow::updateRoomItemList(){
@@ -281,6 +300,10 @@ bool MainWindow::goDirection(QString direction) {
         currentRoom = nextRoom;
         updateCurrentRoom();        // Update the UI to display the new current room
         updateRoomItemList();
+
+        // Clear the output box before appending the description of the new room
+        ui->OutputBox->clear();
+
         appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
         return true; // Return true to indicate successful direction change
     } else {
@@ -307,10 +330,45 @@ void MainWindow::UseButtonClicked()
             // Handle item selection changes
             qDebug() << "Selected item:" << selectedItem->text();
             updatePlayerItemList();
+            ui->UseButton->setStyleSheet("");
+
         }
     }
 }
+void MainWindow::DropButtonClicked() {
+    // Check if the DropButton is red
+    QString buttonColor = ui->DropButton->styleSheet();
+    if (buttonColor.contains("background-color: red")) {
+        // Check if an item is selected in the player's inventory list
+        QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
+        if (selectedItem) {
+            // Retrieve the item's name
+            QString itemName = selectedItem->text();
+            // Check if the selected item is a HeartCrystal or SkipStone
+            int itemId = 0;
+            if (itemName.contains("HeartCrystal")) {itemId = 1;};
+            if (itemName.contains("SkipStone")) {itemId = 2;};
+            if (selectedItem) {
+                qDebug() <<"urmom";
+                updateStats();
+                qDebug() <<"urmom1";
 
+                // Create a new instance of the item to add to the current room
+                Item* itemToAdd = player.getItem(itemId);
+                if (itemToAdd) {
+                    Item* newItem = new Item(*itemToAdd); // Create a new instance
+                    currentRoom->addItem(newItem); // Add the new instance to the room
+                    player.removeItem(itemId);
+                    // Update the item lists
+                    updatePlayerItemList();
+                    updateRoomItemList();
+                }
+                ui->DropButton->setStyleSheet(""); // Reset button style
+            }
+
+        }
+    }
+}
 void MainWindow::PickupButtonClicked()
 {
     // Check if the PickupButton is red
@@ -321,45 +379,26 @@ void MainWindow::PickupButtonClicked()
         QListWidgetItem *selectedItem = ui->RoomList->currentItem();
         if(selectedItem)
         {
+            int itemId=0;
             // Retrieve the item's name
             QString itemName = selectedItem->text();
-            // Check if the selected item is a HeartCrystal
-            if(itemName.contains("HeartCrystal"))
+            // Get the item's ID
+            if(selectedItem->text().contains("SkipStone")){int itemId=2;};
+            if(selectedItem->text().contains("HeartCrystal")){int itemId=1;};
+            if(itemId!=0) // Item found
             {
-                // Find the HeartCrystal in the room and add it to the player's inventory
-                Item* heartCrystal = currentRoom->getItem(1);
-                if(heartCrystal)
+                // Find the item in the room
+                Item* item = currentRoom->getItem(itemId);
+                if(item)
                 {
-                    player.addItem(heartCrystal);
-                    updateStats();
-                    // Remove the HeartCrystal from the room
-                    if(heartCrystal->getQuantity() > 0)
-                    {
-                        heartCrystal->decQuantity();
-                    }
-                    if(heartCrystal->getQuantity()==0){currentRoom->removeItem(heartCrystal->getId());};
+                    // Add the item to the player's inventory
+                    player.addItem(item);
 
-                    // Update the item lists
-                    updatePlayerItemList();
-                    updateRoomItemList();
-                }
-            }
-            else if(itemName.contains("SkipStone"))
-            {
-                // Find the SkipStone in the room
-                Item* skipStone = currentRoom->getItem(2);
-                if(skipStone)
-                {
-                    // Add the SkipStone to the player's inventory
-                    player.addItem(new SkipStone(player));
+                    // Remove the item from the room
+                    currentRoom->removeItem(itemId);
+
+                    // Update UI
                     updateStats();
-                    // Decrement the SkipStone's quantity in the room if it's greater than 0
-                    if(skipStone->getQuantity() > 0)
-                    {
-                        skipStone->decQuantity();
-                    }
-                    if(skipStone->getQuantity()==0){currentRoom->removeItem(skipStone->getId());};
-                    // Update the item lists
                     updatePlayerItemList();
                     updateRoomItemList();
                 }
@@ -367,4 +406,3 @@ void MainWindow::PickupButtonClicked()
         }
     }
 }
-

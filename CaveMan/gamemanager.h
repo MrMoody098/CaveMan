@@ -1,40 +1,42 @@
-// // GameManager.h
-// #pragma once
+#ifndef GAMEMANAGER_H
+#define GAMEMANAGER_H
 
-// #include <QObject>
-// #include <QListWidgetItem>
-// #include <QTimer>
-// #include "room.h"
-// #include "player.h"
-// #include "heartcrystal.h"
+#include <QObject>
+#include <QTimer>
+#include <QDebug>
+#include "Room.h"
+#include "Player.h"
+#include "HeartCrystal.h"
+#include "SkipStone.h"
+#include "mainwindow.h"
 
-// class GameManager : public QObject {
-//     Q_OBJECT
-// public:
-//     GameManager(QObject* parent = nullptr);
-//     ~GameManager();
+class GameManager : public QObject {
+    Q_OBJECT
+public:
+    explicit GameManager(Ui::MainWindow &ui, QObject *parent = nullptr);
+    ~GameManager();
 
-//     void startGame();
+    void initializeGame();
 
-// private slots:
-//     void goDirection(QString direction);
-//     void useButtonClicked();
-//     void pickupButtonClicked();
-//     void roomSelectedItemChanged(QListWidgetItem *item);
-//     void selectedItemChanged(QListWidgetItem *item);
+private:
+    Ui::MainWindow &ui; // Use a reference to Ui::MainWindow
+    Player player;
+    HeartCrystal heartCrystal;
+    Room* currentRoom;
+    QString introText;
+    int currentIndex;
 
-// signals:
-//     void appendText(const QString &text, int delay);
+    void connectSignalsAndSlots();
+    void updatePlayerItemList();
+    void updateRoomItemList();
+    void updateStats();
+    void updateCurrentRoom();
+    bool goDirection(const QString &direction);
+    void useButtonClicked();
+    void pickupButtonClicked();
+    void roomSelectedItemChanged(QListWidgetItem *item);
+    void selectedItemChanged(QListWidgetItem *item);
+    void appendText(const QString &text, int delay);
+};
 
-// private:
-//     void initializeGame();
-//     void updatePlayerItemList();
-//     void updateRoomItemList();
-//     void updateStats();
-//     void updateCurrentRoom();
-
-//     Room* currentRoom;
-//     Player player;
-//     HeartCrystal heartCrystal;
-//     int currentIndex;
-// };
+#endif // GAMEMANAGER_H

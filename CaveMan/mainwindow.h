@@ -37,6 +37,8 @@ private slots:
     void SelectedItemChanged(QListWidgetItem *item);
     void UseButtonClicked();
     void PickupButtonClicked();
+    void setButtonsEnabled(bool enabled);
+    void DropButtonClicked();
 private:
     Ui::MainWindow *ui;
     QString introText;

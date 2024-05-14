@@ -14,6 +14,7 @@ public:
     void addHealth(int amount);
     void subtractHealth(int amount);
     void addItem(Item* newItem);
+    void removeItem(int itemId);
     int getNumItems();
     void addCoins(int);
     void incCoins(int);

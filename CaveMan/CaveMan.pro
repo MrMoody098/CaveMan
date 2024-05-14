@@ -11,7 +11,6 @@ CONFIG += c++17
 SOURCES += \
     Character.cpp \
     enemy.cpp \
-    gamemanager.cpp \
     heartcrystal.cpp \
     item.cpp \
     main.cpp \
@@ -23,7 +22,6 @@ SOURCES += \
 HEADERS += \
     Character.h \
     enemy.h \
-    gamemanager.h \
     heartcrystal.h \
     item.h \
     mainwindow.h \

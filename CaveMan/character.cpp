@@ -39,6 +39,26 @@ void Character::addItem(Item* newItem) {
     }
     else{ items.push_back(newItem); };
 }
+void Character::removeItem(int itemId) {
+    qDebug() << "check1";
+
+    // Iterate through the items vector
+    for (auto it = items.begin(); it != items.end(); ++it) {
+        qDebug() << "check2";
+
+        // Check if the current item's ID matches the specified ID
+        if ((*it)->getId() == itemId) {
+            qDebug() << "check3";
+
+            // Remove the item from the vector
+            items.erase(it); // Remove the item from the vector
+            qDebug() << "check4";
+
+            return; // Exit the function after removing the item
+        }
+    }
+}
+
 
 int Character::getNumItems() {
     return items.size();
