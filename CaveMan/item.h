@@ -4,8 +4,8 @@
 #include <QMainWindow>
 
 struct BitStructure {
-    int quantity: 3; // store up to 7 in quantity
-    int value: 4;    // store our value of 15
+    int quantity: 10; // store up to 7 in quantity
+    int value: 10;    // store our value of 15
     int isConsumable: 1; // stores isConsumable check
     int id: 3; //store id up to 7
 };
@@ -18,7 +18,7 @@ public:
     //Release Memeory using descturctor
 
     int getValue();
-    int getDescription;
+    QString getDescription();
     int getQuantity();
     void incQuantity();
     void decQuantity();

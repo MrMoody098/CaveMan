@@ -1,6 +1,6 @@
 #include "skipstone.h"
 // Constructor implementation
-SkipStone::SkipStone(Player& player) : Item(5, "Gives Player +1 HP","HeartCrystal",1,2,1), player(player) {
+SkipStone::SkipStone(Player& player) : Item(5, "Allows Player to Skip a fight","SkipStone",1,2,1), player(player) {
 
 }
 

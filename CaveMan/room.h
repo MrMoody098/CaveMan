@@ -25,7 +25,7 @@ public:
     Room* getWest();
 
     void addItem(Item item);
-    void removeItem(Item* item);
+    void removeItem(int id);
     void setDescription(QString description);
     QString itemListToQString();
 

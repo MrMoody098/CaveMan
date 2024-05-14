@@ -12,6 +12,9 @@ Item::Item(int value, QString description,QString name,int quantity,int id,int i
 QString Item:: getName(){
     return this->name;
 }
+QString Item::getDescription(){
+    return this->description;
+}
 
 int Item::getId(){
     return bitStruct.id;
@@ -41,7 +44,9 @@ void Item::incQuantity(){
 }
 
 void Item::decQuantity(){
+    if(bitStruct.quantity>0){
     bitStruct.quantity--;
+    };
 }
 void Item::use() {
     // Default implementation for using an item

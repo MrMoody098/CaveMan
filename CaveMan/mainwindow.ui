@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1326</width>
+    <width>1334</width>
     <height>725</height>
    </rect>
   </property>
@@ -49,7 +49,7 @@
     <property name="geometry">
      <rect>
       <x>1070</x>
-      <y>0</y>
+      <y>10</y>
       <width>241</width>
       <height>151</height>
      </rect>
@@ -130,9 +130,9 @@
     <property name="geometry">
      <rect>
       <x>1070</x>
-      <y>160</y>
+      <y>190</y>
       <width>241</width>
-      <height>241</height>
+      <height>211</height>
      </rect>
     </property>
     <property name="selectionMode">
@@ -172,9 +172,9 @@
     <property name="geometry">
      <rect>
       <x>1070</x>
-      <y>410</y>
+      <y>430</y>
       <width>241</width>
-      <height>261</height>
+      <height>241</height>
      </rect>
     </property>
     <property name="selectionMode">
@@ -678,7 +678,7 @@
       <string>USE</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="UseButton_2">
+    <widget class="QPushButton" name="PickupButton">
      <property name="geometry">
       <rect>
        <x>160</x>
@@ -1160,7 +1160,7 @@
       <string>PICKUP</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="UseButton_3">
+    <widget class="QPushButton" name="DropButton">
      <property name="geometry">
       <rect>
        <x>310</x>
@@ -1642,7 +1642,7 @@
       <string>DROP</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="UseButton_4">
+    <widget class="QPushButton" name="InspectButton">
      <property name="geometry">
       <rect>
        <x>460</x>
@@ -4049,7 +4049,7 @@
       </palette>
      </property>
      <property name="text">
-      <string>INSPECT</string>
+      <string>FIGHT</string>
      </property>
     </widget>
    </widget>
@@ -5999,13 +5999,61 @@
     <widget class="QTextEdit" name="CurrentRoom">
      <property name="geometry">
       <rect>
-       <x>470</x>
-       <y>10</y>
-       <width>104</width>
-       <height>85</height>
+       <x>260</x>
+       <y>90</y>
+       <width>81</width>
+       <height>81</height>
       </rect>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>81</width>
+       <height>81</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>Vladimir Script</family>
+       <pointsize>36</pointsize>
+      </font>
+     </property>
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Vladimir Script'; font-size:36pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; dir='rtl' style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Segoe UI';&quot;&gt;A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
     </widget>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>1140</x>
+      <y>410</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ITEMS IN ROOM</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>1140</x>
+      <y>170</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>INVENTORY</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -6013,7 +6061,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1326</width>
+     <width>1334</width>
      <height>25</height>
     </rect>
    </property>
