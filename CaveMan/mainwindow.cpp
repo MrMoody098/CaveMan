@@ -88,6 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::UseButtonClicked);
 
+    connect(ui->DropButton, &QPushButton::clicked, this, &MainWindow::DropButtonClicked);
+
     connect(ui->NorthButton, &QPushButton::clicked, this, [this]() {
         if (goDirection("NORTH")) {
             updateCurrentRoom();
@@ -168,6 +170,8 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
     if(item->text().contains("HeartCrystal") )
     {
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
+        ui->DropButton->setStyleSheet("background-color: red; color: white;");
+
         // Reset the color of the PickupButton to its default
         ui->PickupButton->setStyleSheet("");
     }
@@ -175,6 +179,8 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
     else if(item->text().contains("SkipStone") )
     {
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
+        ui->DropButton->setStyleSheet("background-color: red; color: white;");
+
         // Reset the color of the PickupButton to its default
         ui->PickupButton->setStyleSheet("");
     }
@@ -188,8 +194,10 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
 }
 
 
-//This Method is used to append Text Character By Character
 void MainWindow::appendText(const QString &text, int delay) {
+    // Disable buttons while displaying intro text
+    setButtonsEnabled(false);
+
     // Create a QTimer object
     QTimer *timer = new QTimer(this);
 
@@ -211,6 +219,9 @@ void MainWindow::appendText(const QString &text, int delay) {
 
             // Delete timer to clean up resources
             timer->deleteLater();
+
+            // Re-enable buttons after text display
+            setButtonsEnabled(true);
         }
     });
 
@@ -218,6 +229,14 @@ void MainWindow::appendText(const QString &text, int delay) {
     timer->start(delay);
 }
 
+void MainWindow::setButtonsEnabled(bool enabled) {
+    ui->NorthButton->setEnabled(enabled);
+    ui->SouthButton->setEnabled(enabled);
+    ui->EastButton->setEnabled(enabled);
+    ui->WestButton->setEnabled(enabled);
+    ui->PickupButton->setEnabled(enabled);
+    ui->UseButton->setEnabled(enabled);
+}
 void MainWindow::updateRoomItemList(){
     ui->RoomList->clear();
     for(Item* i:currentRoom->getItems()){
@@ -311,6 +330,44 @@ void MainWindow::UseButtonClicked()
     }
 }
 
+
+void MainWindow::DropButtonClicked()
+{
+    // Check if the DropButton is red
+    QString buttonColor = ui->DropButton->styleSheet();
+    if(buttonColor.contains("background-color: red")){
+    QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
+    if(selectedItem)
+        {
+            // Retrieve the item's name
+            QString itemName = selectedItem->text();
+
+            // Check if the selected item is a HeartCrystal
+            if(itemName.contains("HeartCrystal"))
+            {
+                //if room has a heartCrystal inc room heart crystal and dec player heartCrystal
+                if(currentRoom->getItem(1)){
+
+                    currentRoom->getItem(1)->incQuantity();
+                    player.getItem(1)->decQuantity();
+                }
+                //else dec player heartCrystal by one and add a new heartCrystal object into the room
+                else{
+
+                    player.getItem(1)->decQuantity();
+                    currentRoom->addItem(new HeartCrystal(player));
+                }
+            }
+        }
+
+    }
+    // Update the item lists
+    updatePlayerItemList();
+    updateRoomItemList();
+}
+
+
+
 void MainWindow::PickupButtonClicked()
 {
     // Check if the PickupButton is red
@@ -330,16 +387,16 @@ void MainWindow::PickupButtonClicked()
                 Item* heartCrystal = currentRoom->getItem(1);
                 if(heartCrystal)
                 {
-                    player.addItem(heartCrystal);
-                    updateStats();
-                    // Remove the HeartCrystal from the room
-                    if(heartCrystal->getQuantity() > 0)
+                    if(player.getItem(1)->getQuantity()==0){player.addItem(heartCrystal);currentRoom->removeItem(heartCrystal->getId());}
+                    else{
                     {
                         heartCrystal->decQuantity();
+                        player.getItem(1)->incQuantity();
                     }
                     if(heartCrystal->getQuantity()==0){currentRoom->removeItem(heartCrystal->getId());};
-
+                    }
                     // Update the item lists
+                    updateStats();
                     updatePlayerItemList();
                     updateRoomItemList();
                 }

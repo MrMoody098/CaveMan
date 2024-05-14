@@ -20,6 +20,8 @@ public:
     int getCoins();
     Item* getItem(int id);
     std::vector<Item*> getItems();
+    void removeItem(int id);
+
 protected:
     int health;
     int coins;

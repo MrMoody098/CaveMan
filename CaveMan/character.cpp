@@ -40,6 +40,16 @@ void Character::addItem(Item* newItem) {
     else{ items.push_back(newItem); };
 }
 
+void Character::removeItem(int id) {
+    for(auto iter = items.begin(); iter != items.end(); ++iter){
+        if((*iter)->getId() == id){
+            delete *iter; // Free memory of the item being removed
+            items.erase(iter); // Remove the item from the vector
+            return;
+        }
+    }
+}
+
 int Character::getNumItems() {
     return items.size();
 }
