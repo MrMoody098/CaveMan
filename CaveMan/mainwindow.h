@@ -32,11 +32,11 @@ private slots:
     void updateRoomItemList();
     void updateStats();
     void updateCurrentRoom();
-
+    void RoomSelectedItemChanged(QListWidgetItem *item);
     //button handlers
     void SelectedItemChanged(QListWidgetItem *item);
     void UseButtonClicked();
-
+    void PickupButtonClicked();
 private:
     Ui::MainWindow *ui;
     QString introText;
@@ -45,6 +45,7 @@ private:
     Player player;
     HeartCrystal heartCrystal;
     QLabel *imageLabel = new QLabel(this);
+
 
 };
 

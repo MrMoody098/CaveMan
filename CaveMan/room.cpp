@@ -1,5 +1,4 @@
 #include "room.h"
-
 //we set the exit pointers to null so were not pointing to any random memeory address
 Room::Room(QString name) : name(name), North(nullptr), East(nullptr), South(nullptr), West(nullptr) {}
 
@@ -25,6 +24,16 @@ std::vector<Item*> Room::getItems()
     return items;
 }
 
+QString Room::itemListToQString(){
+    QString listToString=" in the room there is a ";
+    if(items.empty()){return " there is no items in the room";}
+
+    for (Item* item : items){
+        listToString += (item->getName()+" ");
+    };
+    return listToString;
+}
+
 Item* Room::getItem(int id){
     for(Item* i:items){
         if (i->getId() ==id){
@@ -38,6 +47,19 @@ Item* Room::getItem(int id){
 void Room::addItem(Item* newItem) {
     if(getItem(newItem->getId())){ getItem(newItem->getId())->incQuantity(); }
     else{ items.push_back(newItem); };
+}
+
+void Room::removeItem(int itemId) {
+    // Iterate through the items vector
+    for (auto it = items.begin(); it != items.end(); ++it) {
+        // Check if the current item's ID matches the specified ID
+        if ((*it)->getId() == itemId) {
+            // Remove the item from the vector
+            delete *it; // Free the memory allocated for the item
+            items.erase(it); // Remove the item from the vector
+            return; // Exit the function after removing the item
+        }
+    }
 }
 
 int Room::getNumItems() {

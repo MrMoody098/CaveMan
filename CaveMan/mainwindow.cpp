@@ -3,6 +3,7 @@
 #include "heartcrystal.h"
 #include <QLabel>
 #include <QPixmap>
+#include "skipstone.h"
 using namespace std;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -33,8 +34,15 @@ MainWindow::MainWindow(QWidget *parent)
     // Create rooms dynamically
     Room* roomA = new Room("A");
     Room* roomB = new Room("B");
+    roomB->setDescription("A dusty hallway");
+    roomB->addItem(new SkipStone(player));
     Room* roomC = new Room("C");
+    roomC->setDescription("A large mineshaft at the end of the room there is a Chest.");
     Room* roomD = new Room("D");
+    roomD->setDescription("A smelly cubbord there is a little spider in the corner.");
+    roomD->addItem(new SkipStone(player));
+
+
     Room* roomE = new Room("E");
     Room* roomF = new Room("F");
     Room* roomG = new Room("G");
@@ -72,6 +80,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     // Connect signals and slots
+
+    connect(ui->PickupButton, &QPushButton::clicked, this, &MainWindow::PickupButtonClicked);
+    connect(ui->RoomList, &QListWidget::itemClicked, this, &MainWindow::RoomSelectedItemChanged);
+
+    connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::SelectedItemChanged);
+
+    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::UseButtonClicked);
+
     connect(ui->NorthButton, &QPushButton::clicked, this, [this]() {
         if (goDirection("NORTH")) {
             updateCurrentRoom();
@@ -106,19 +122,45 @@ MainWindow::MainWindow(QWidget *parent)
     player.addItem(hc);
     updatePlayerItemList();
     currentRoom->addItem(new HeartCrystal(player));
+    currentRoom->addItem(new HeartCrystal(player));
     updateRoomItemList();
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->RoomList->setSelectionMode(QAbstractItemView::SingleSelection);
 
 
-    // Connect itemClicked signal to a slot for handling item selection changes
-    connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::SelectedItemChanged);
-    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::UseButtonClicked);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+
+}
+
+void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
+    if(item->text().contains("HeartCrystal") )
+    {
+        ui->PickupButton->setStyleSheet("background-color: red; color: white;");
+        qDebug() << item->text() ;
+        // Reset the color of the UseButton to its default
+        ui->UseButton->setStyleSheet("");
+    }
+
+    else if(item->text().contains("SkipStone") )
+    {
+        ui->PickupButton->setStyleSheet("background-color: red; color: white;");
+        qDebug() << item->text() ;
+
+        // Reset the color of the UseButton to its default
+        ui->UseButton->setStyleSheet("");
+    }
+
+    else
+    {
+        // Reset the color of both buttons to their default
+        ui->PickupButton->setStyleSheet("");
+        ui->UseButton->setStyleSheet("");
+    };
 }
 
 void MainWindow::SelectedItemChanged(QListWidgetItem *item)
@@ -126,21 +168,25 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
     if(item->text().contains("HeartCrystal") )
     {
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
+        // Reset the color of the PickupButton to its default
+        ui->PickupButton->setStyleSheet("");
     }
 
     else if(item->text().contains("SkipStone") )
     {
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
+        // Reset the color of the PickupButton to its default
+        ui->PickupButton->setStyleSheet("");
     }
 
     else
     {
-        // Reset the color of the UseButton to its default
+        // Reset the color of both buttons to their default
         ui->UseButton->setStyleSheet("");
-        // Other actions you want to perform when another item is selected
+        ui->PickupButton->setStyleSheet("");
     };
-
 }
+
 
 //This Method is used to append Text Character By Character
 void MainWindow::appendText(const QString &text, int delay) {
@@ -149,7 +195,7 @@ void MainWindow::appendText(const QString &text, int delay) {
 
     // used to keep track of current character index
     currentIndex = 0;
-
+    ui->OutputBox->insertPlainText("\n");
     // Connect the timeout signal of the QTimer to a lambda function
     connect(timer, &QTimer::timeout, [=]() {
         // Check if currentIndex is within the text length
@@ -235,6 +281,7 @@ bool MainWindow::goDirection(QString direction) {
         currentRoom = nextRoom;
         updateCurrentRoom();        // Update the UI to display the new current room
         updateRoomItemList();
+        appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
         return true; // Return true to indicate successful direction change
     } else {
         qDebug() << "Cannot move in the specified direction.";
@@ -244,19 +291,80 @@ bool MainWindow::goDirection(QString direction) {
 }
 
 
-
-
 void MainWindow::UseButtonClicked()
 {
-    // Check if the HeartCrystal is selected in the list
-    QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
-    if(selectedItem && selectedItem->text().contains("HeartCrystal"))
+    // Check if the UseButton is red
+    QString buttonColor = ui->UseButton->styleSheet();
+    if(buttonColor.contains("background-color: red"))
     {
-        // Use the HeartCrystal
-        player.getItem(1)->use();
-        updateStats();
-        // Handle item selection changes
-        qDebug() << "Selected item:" << selectedItem->text();
-        updatePlayerItemList();
+        // Check if the HeartCrystal is selected in the list
+        QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
+        if(selectedItem && selectedItem->text().contains("HeartCrystal"))
+        {
+            // Use the HeartCrystal
+            player.getItem(1)->use();
+            updateStats();
+            // Handle item selection changes
+            qDebug() << "Selected item:" << selectedItem->text();
+            updatePlayerItemList();
+        }
     }
 }
+
+void MainWindow::PickupButtonClicked()
+{
+    // Check if the PickupButton is red
+    QString buttonColor = ui->PickupButton->styleSheet();
+    if(buttonColor.contains("background-color: red"))
+    {
+        // Check if an item is selected in the room list
+        QListWidgetItem *selectedItem = ui->RoomList->currentItem();
+        if(selectedItem)
+        {
+            // Retrieve the item's name
+            QString itemName = selectedItem->text();
+            // Check if the selected item is a HeartCrystal
+            if(itemName.contains("HeartCrystal"))
+            {
+                // Find the HeartCrystal in the room and add it to the player's inventory
+                Item* heartCrystal = currentRoom->getItem(1);
+                if(heartCrystal)
+                {
+                    player.addItem(heartCrystal);
+                    updateStats();
+                    // Remove the HeartCrystal from the room
+                    if(heartCrystal->getQuantity() > 0)
+                    {
+                        heartCrystal->decQuantity();
+                    }
+                    if(heartCrystal->getQuantity()==0){currentRoom->removeItem(heartCrystal->getId());};
+
+                    // Update the item lists
+                    updatePlayerItemList();
+                    updateRoomItemList();
+                }
+            }
+            else if(itemName.contains("SkipStone"))
+            {
+                // Find the SkipStone in the room
+                Item* skipStone = currentRoom->getItem(2);
+                if(skipStone)
+                {
+                    // Add the SkipStone to the player's inventory
+                    player.addItem(new SkipStone(player));
+                    updateStats();
+                    // Decrement the SkipStone's quantity in the room if it's greater than 0
+                    if(skipStone->getQuantity() > 0)
+                    {
+                        skipStone->decQuantity();
+                    }
+                    if(skipStone->getQuantity()==0){currentRoom->removeItem(skipStone->getId());};
+                    // Update the item lists
+                    updatePlayerItemList();
+                    updateRoomItemList();
+                }
+            }
+        }
+    }
+}
+
