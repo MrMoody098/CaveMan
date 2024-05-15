@@ -4,16 +4,16 @@
 #include <QMainWindow>
 
 struct BitStructure {
-    int quantity: 10; // store up to 7 in quantity
-    int value: 10;    // store our value of 15
+    int quantity: 10; // store up to 10 in quantity
+    int value: 10;    // store our value of 10
     int isConsumable: 1; // stores isConsumable check
-    int id: 3; //store id up to 7
+    int id: 3; //store id up to 3
 };
 
 class Item
 {
 public:
-    // Constructor
+    //Constructor
     Item( int value,QString description,QString name,int quantity,int id,int isConsumable);
     //Release Memeory using descturctor
 
@@ -29,7 +29,6 @@ public:
     void setValue(int);
     void setValues(int quantity, int value, int isConsumable);
     void setQuantity(int quantity);
-
     virtual void use();
 
     // Override the use function to add health

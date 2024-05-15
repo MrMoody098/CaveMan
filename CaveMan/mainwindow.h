@@ -22,8 +22,6 @@ public:
     ~MainWindow();
 
 private slots:
-    bool goDirection(QString direction);
-
 
     void appendText(const QString &text, int delay);
 
@@ -40,16 +38,22 @@ private slots:
     void setButtonsEnabled(bool enabled);
     void dropButtonClicked();
     void inspectButtonClicked();
+    void fight();
+    void flee();
 private:
+    bool goDirection(QString direction);
+
     Ui::MainWindow *ui;
     QString introText;
     int currentIndex;
     Room* currentRoom;
+    Room* lastRoom;
     Player player;
     HeartCrystal heartCrystal;
     QLabel *imageLabel = new QLabel(this);
-
+    void challenge();
     QScrollBar *vScrollBar;
+    bool fighting;
 
 };
 

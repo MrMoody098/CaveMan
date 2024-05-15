@@ -41,3 +41,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     ../../../OneDrive/Desktop/CaveManMap.png
+
+RESOURCES += \
+    resources.qrc
