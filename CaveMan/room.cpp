@@ -1,6 +1,6 @@
 #include "room.h"
 //we set the exit pointers to null so were not pointing to any random memeory address
-Room::Room(QString name) : name(name), North(nullptr), East(nullptr), South(nullptr), West(nullptr) {}
+Room::Room(QString name) : name(name), North(nullptr), East(nullptr), South(nullptr), West(nullptr),enemy(nullptr) {}
 
 void Room::setExits(Room* North, Room* East, Room* South, Room* West)
 {
@@ -16,7 +16,7 @@ Enemy* Room::getEnemy(){
     return this->enemy;
 }
 void Room::setEnemy(Enemy* enemy){
-    this->enemy =enemy;
+    this->enemy = enemy;
 }
 std::vector<Item*> Room::getItems()
 {
@@ -64,6 +64,9 @@ void Room::removeItem(int itemId) {
 
 int Room::getNumItems() {
     return items.size();
+}
+bool Room::enemyInRoom(){
+    return enemy!=nullptr;
 }
 
 

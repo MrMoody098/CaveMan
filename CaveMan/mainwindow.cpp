@@ -2,26 +2,31 @@
 #include "ui_mainwindow.h"
 #include "heartcrystal.h"
 #include <QLabel>
+#include <iostream>
 #include <QPixmap>
 #include "skipstone.h"
+#include <QScrollBar>
 using namespace std;
+int APPEND_TIME =10;
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     player(),
     heartCrystal(player),
-    currentRoom(nullptr) { // Initialize currentRoom pointer to nullptr
+    currentRoom(nullptr),
+    lastRoom(nullptr){ // Initialize currentRoom pointer to nullptr
     ui->setupUi(this);
-    //add a pointer to the heartCrystal
 
+    fighting = false;
+    //add a pointer to the heartCrystal
     // Load the map image
     QPixmap image("C:/Users/ticta/OneDrive/Desktop/CaveManMap.png");
 
-    // Set the scaled image to the QLabel
-    ui->Map_2->setPixmap(image.scaled(ui->Map_2->size(), Qt::KeepAspectRatio));
 
     // Make the QTextEdit widget read-only
     ui->OutputBox->setReadOnly(true);
+    ui->OutputBox->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     // Initialize intro text and other variables
     introText = "Welcome to CaveMan's Descent!\n\n"
@@ -29,15 +34,19 @@ MainWindow::MainWindow(QWidget *parent)
                 "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
                 "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
 
-    // Initialize current room to point to roomA
-
     // Create rooms dynamically
     Room* roomA = new Room("A");
     Room* roomB = new Room("B");
     roomB->setDescription("A dusty hallway");
     roomB->addItem(new SkipStone(player));
     Room* roomC = new Room("C");
-    roomC->setDescription("A large mineshaft at the end of the room there is a Chest.");
+    roomC->setDescription("A large mineshaft.");
+    Enemy* roomCEnemy = new Enemy("Chris the cryptid","\n a legendary creature rumored to lurk in the depths of dark forests and misty swamps.");
+    // roomCEnemy->addItem(new HeartCrystal(player));
+    // roomCEnemy->addItem(new HeartCrystal(player));
+    roomC->setEnemy(roomCEnemy);
+    qDebug() << roomC->enemyInRoom();
+
     Room* roomD = new Room("D");
     roomD->setDescription("A smelly cubbord there is a little spider in the corner.");
     roomD->addItem(new SkipStone(player));
@@ -53,12 +62,6 @@ MainWindow::MainWindow(QWidget *parent)
     Room* roomL = new Room("L");
     Room* roomM = new Room("M");
     Room* roomN = new Room("N");
-
-
-
-
-
-
 
     currentRoom = roomA;
     // Set exits for each room
@@ -81,14 +84,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Connect signals and slots
 
-    connect(ui->PickupButton, &QPushButton::clicked, this, &MainWindow::PickupButtonClicked);
-    connect(ui->RoomList, &QListWidget::itemClicked, this, &MainWindow::RoomSelectedItemChanged);
+    connect(ui->PickupButton, &QPushButton::clicked, this, &MainWindow::pickupButtonClicked);
+    connect(ui->RoomList, &QListWidget::itemClicked, this, &MainWindow::roomSelectedItemChanged);
 
-    connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::SelectedItemChanged);
+    connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::selectedItemChanged);
 
-    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::UseButtonClicked);
+    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::useButtonClicked);
 
-    connect(ui->DropButton, &QPushButton::clicked, this, &MainWindow::DropButtonClicked);
+    connect(ui->DropButton, &QPushButton::clicked, this, &MainWindow::dropButtonClicked);
+
+    connect(ui->InspectButton, &QPushButton::clicked, this, &MainWindow::inspectButtonClicked);
+
+    connect(ui->FightButton, &QPushButton::clicked, this, &MainWindow::fight);
+    connect(ui->FleeButton, &QPushButton::clicked, this, &MainWindow::flee);
 
     connect(ui->NorthButton, &QPushButton::clicked, this, [this]() {
         if (goDirection("NORTH")) {
@@ -117,7 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Call the appendText function with the intro text
     player.setHealth(10);
     player.addCoins(1);
-    appendText(introText, 10);
+    appendText(introText, APPEND_TIME);
     updateStats();
     HeartCrystal* hc = &heartCrystal;
     hc->setValues(1, 8, 8);
@@ -125,6 +133,7 @@ MainWindow::MainWindow(QWidget *parent)
     updatePlayerItemList();
     currentRoom->addItem(new HeartCrystal(player));
     currentRoom->addItem(new HeartCrystal(player));
+    currentRoom->addItem(new SkipStone(player));
     updateRoomItemList();
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -139,7 +148,7 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
+void MainWindow::roomSelectedItemChanged(QListWidgetItem *item){
     if(item->text().contains("HeartCrystal") )
     {
         ui->PickupButton->setStyleSheet("background-color: red; color: white;");
@@ -147,6 +156,8 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
         // Reset the color of the UseButton to its default
         ui->UseButton->setStyleSheet("");
         ui->DropButton->setStyleSheet("");
+        ui->InspectButton->setStyleSheet("");
+
 
     }
 
@@ -158,11 +169,14 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
         // Reset the color of the UseButton to its default
         ui->UseButton->setStyleSheet("");
         ui->DropButton->setStyleSheet("");
+        ui->InspectButton->setStyleSheet("");
+
 
     }
 
     else
     {
+        ui->InspectButton->setStyleSheet("");
         // Reset the color of both buttons to their default
         ui->PickupButton->setStyleSheet("");
         ui->UseButton->setStyleSheet("");
@@ -171,10 +185,12 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
     };
 }
 
-void MainWindow::SelectedItemChanged(QListWidgetItem *item)
+void MainWindow::selectedItemChanged(QListWidgetItem *item)
 {
     if(item->text().contains("HeartCrystal") )
     {
+        ui->InspectButton->setStyleSheet("background-color: red; color: white;");
+
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
         ui->DropButton->setStyleSheet("background-color: red; color: white;");
 
@@ -184,6 +200,8 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
 
     else if(item->text().contains("SkipStone") )
     {
+        ui->InspectButton->setStyleSheet("background-color: red; color: white;");
+
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
         ui->DropButton->setStyleSheet("background-color: red; color: white;");
 
@@ -193,6 +211,8 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
 
     else
     {
+        ui->InspectButton->setStyleSheet("");
+        ui->DropButton->setStyleSheet("");
         // Reset the color of both buttons to their default
         ui->UseButton->setStyleSheet("");
         ui->PickupButton->setStyleSheet("");
@@ -216,7 +236,11 @@ void MainWindow::appendText(const QString &text, int delay) {
         if (currentIndex < text.length()) {
             // Append the current character to the OutputBox
             ui->OutputBox->insertPlainText(text.at(currentIndex));
-
+            if (currentIndex % 35 == 0) {
+                // Perform the desired action here
+                QScrollBar *vScrollBar = ui->OutputBox->verticalScrollBar(); // Get the vertical scroll bar
+                vScrollBar->setValue(vScrollBar->maximum()); // Scroll to the bottom
+            }
             // Increment currentIndex
             currentIndex++;
         } else {
@@ -228,21 +252,44 @@ void MainWindow::appendText(const QString &text, int delay) {
 
             // Re-enable buttons after text display
             setButtonsEnabled(true);
+
+            QScrollBar *vScrollBar = ui->OutputBox->verticalScrollBar(); // Get the vertical scroll bar
+            vScrollBar->setValue(vScrollBar->maximum()); // Scroll to the bottom
         }
     });
 
     // Start the QTimer with the specified delay
     timer->start(delay);
+
 }
 
 void MainWindow::setButtonsEnabled(bool enabled) {
+    if(!fighting){
     ui->NorthButton->setEnabled(enabled);
+    ui->NorthButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
     ui->SouthButton->setEnabled(enabled);
+    ui->SouthButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
     ui->EastButton->setEnabled(enabled);
+    ui->EastButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
     ui->WestButton->setEnabled(enabled);
-    ui->PickupButton->setEnabled(enabled);
-    ui->UseButton->setEnabled(enabled);
+    ui->WestButton->setStyleSheet(enabled ? "" : "background-color: grey;");
 }
+    ui->PickupButton->setEnabled(enabled);
+    ui->PickupButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
+    ui->UseButton->setEnabled(enabled);
+    ui->UseButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
+    ui->InspectButton->setEnabled(enabled);
+    ui->InspectButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
+    ui->DropButton->setEnabled(enabled);
+    ui->DropButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+}
+
 void MainWindow::updateRoomItemList(){
     ui->RoomList->clear();
     for(Item* i:currentRoom->getItems()){
@@ -285,7 +332,7 @@ bool MainWindow::goDirection(QString direction) {
     }
 
     Room* nextRoom = nullptr;
-
+    lastRoom = currentRoom;
     if (direction == "NORTH" && currentRoom->getNorth() != nullptr) {
         nextRoom = currentRoom->getNorth();
         qDebug() << "Next room to the NORTH exists.";
@@ -306,7 +353,8 @@ bool MainWindow::goDirection(QString direction) {
         currentRoom = nextRoom;
         updateCurrentRoom();        // Update the UI to display the new current room
         updateRoomItemList();
-        appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
+        if(currentRoom->enemyInRoom()){qDebug() <<"enemy found";Enemy *Enemy = currentRoom->getEnemy(); appendText(currentRoom->getDescription() + currentRoom->itemListToQString()+"\n"+Enemy->getName()+" "+Enemy->getDescription()+"\n",APPEND_TIME);challenge();}
+        else{appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);}
         return true; // Return true to indicate successful direction change
     } else {
         qDebug() << "Cannot move in the specified direction.";
@@ -316,18 +364,21 @@ bool MainWindow::goDirection(QString direction) {
 }
 
 
-void MainWindow::UseButtonClicked()
+void MainWindow::useButtonClicked()
 {
+
     // Check if the UseButton is red
     QString buttonColor = ui->UseButton->styleSheet();
     if(buttonColor.contains("background-color: red"))
     {
+        int itemId =0;
         // Check if the HeartCrystal is selected in the list
         QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
-        if(selectedItem && selectedItem->text().contains("HeartCrystal"))
-        {
-            // Use the HeartCrystal
-            player.getItem(1)->use();
+        if(selectedItem && selectedItem->text().contains("HeartCrystal")){ itemId =1;}
+        else if(selectedItem && selectedItem->text().contains("SkipStone")){ itemId =2;}
+        if(itemId){
+            // Use the Item
+            player.getItem(itemId)->use();
             updateStats();
             // Handle item selection changes
             qDebug() << "Selected item:" << selectedItem->text();
@@ -337,7 +388,7 @@ void MainWindow::UseButtonClicked()
 }
 
 
-void MainWindow::DropButtonClicked()
+void MainWindow::dropButtonClicked()
 {
     // Check if the DropButton is red
     QString buttonColor = ui->DropButton->styleSheet();
@@ -356,17 +407,17 @@ void MainWindow::DropButtonClicked()
             {
                 //if room has a heartCrystal inc room heart crystal and dec player heartCrystal
                 if(currentRoom->getItem(itemId)){
-                    if(player.getItem(itemId)->getQuantity()==0){return;}
+                if(player.getItem(itemId)->getQuantity()==0){return;}
+
                     currentRoom->getItem(itemId)->incQuantity();
                     player.getItem(itemId)->decQuantity();
                 }
                 //else dec player heartCrystal by one and add a new heartCrystal object into the room
                 else{
                     if(player.getItem(itemId)->getQuantity()==0){return;}
-
                         player.getItem(itemId)->decQuantity();
-                        if(itemId=1){currentRoom->addItem(new HeartCrystal(player));};
-                        if(itemId=2){currentRoom->addItem(new SkipStone(player));};
+                        if(itemId==1){currentRoom->addItem(new HeartCrystal(player));};
+                        if(itemId==2){currentRoom->addItem(new SkipStone(player));};
 
                 }
             }
@@ -379,8 +430,104 @@ void MainWindow::DropButtonClicked()
 }
 
 
+void MainWindow::inspectButtonClicked() {
+    // Check if the InspectButton is red
+    QString buttonColor = ui->InspectButton->styleSheet();
+    if (buttonColor.contains("background-color: red")) {
+        QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
+        if (selectedItem) {
+            // Retrieve the item's name
+            QString itemName = selectedItem->text();
+            int itemId = 0;
+            if (itemName.contains("HeartCrystal")) { itemId = 1; }
+            else if (itemName.contains("SkipStone")) { itemId = 2; }
 
-void MainWindow::PickupButtonClicked()
+            // Check if the selected item is valid
+            if (itemId != 0) {
+                QString description;
+                    // Try to get the item from the player's inventory
+                    Item* item = player.getItem(itemId);
+                    if (item)
+                    {
+                        description = item->getDescription();
+                    }
+                    else
+                    {
+                        description = "Item not found in the player's inventory.";
+                    }
+            appendText(description, APPEND_TIME);
+
+                }
+            }
+
+        }
+}
+
+
+void MainWindow::flee(){
+    // Check if the InspectButton is red
+    QString buttonColor = ui->FleeButton->styleSheet();
+    if (buttonColor.contains("background-color: red")) {
+        currentRoom = lastRoom;
+        updateCurrentRoom();        // Update the UI to display the new current room
+        updateRoomItemList();
+        appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
+        fighting = false;
+        ui->NorthButton->setEnabled(true);
+        ui->NorthButton->setStyleSheet("");
+
+        ui->SouthButton->setEnabled(true);
+        ui->SouthButton->setStyleSheet("");
+
+        ui->EastButton->setEnabled(true);
+        ui->EastButton->setStyleSheet("");
+
+        ui->WestButton->setEnabled(true);
+        ui->WestButton->setStyleSheet("");
+
+        ui->FleeButton->setEnabled(false);
+        ui->FleeButton->setStyleSheet("background-color: grey;");
+
+        ui->FightButton->setEnabled(false);
+        ui->FightButton->setStyleSheet("background-color: grey;");
+
+    }
+}
+void MainWindow::fight(){
+    // Check if the InspectButton is red
+    QString buttonColor = ui->FightButton->styleSheet();
+    if (buttonColor.contains("background-color: red")) {
+        //i want to replace my panel with the fighting buttons
+
+    }
+}
+void MainWindow::challenge(){
+    fighting = true;
+    //check if the buttons are enabled first meaning were done appending text
+        //next make movement buttons unusable
+        ui->NorthButton->setEnabled(false);
+        ui->NorthButton->setStyleSheet("background-color: grey;");
+
+        ui->SouthButton->setEnabled(false);
+        ui->SouthButton->setStyleSheet("background-color: grey;");
+
+        ui->EastButton->setEnabled(false);
+        ui->EastButton->setStyleSheet("background-color: grey;");
+
+        ui->WestButton->setEnabled(false);
+        ui->WestButton->setStyleSheet("background-color: grey;");
+
+        //change color of flee and fight buttons
+
+        ui->FleeButton->setEnabled(true);
+        ui->FleeButton->setStyleSheet("background-color: red;");
+
+        ui->FightButton->setEnabled(true);
+        ui->FightButton->setStyleSheet("background-color: red;");
+
+}
+
+void MainWindow::pickupButtonClicked()
 {
     // Check if the PickupButton is red
     QString buttonColor = ui->PickupButton->styleSheet();

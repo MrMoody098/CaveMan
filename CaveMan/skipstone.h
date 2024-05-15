@@ -9,7 +9,6 @@ public:
     // Override the use function to add health
     void use() override;
     Player& getPlayer();
-
 private:
     Player& player;
 };
