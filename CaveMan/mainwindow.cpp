@@ -4,7 +4,10 @@
 #include <QLabel>
 #include <QPixmap>
 #include "skipstone.h"
+#include <QScrollBar>
 using namespace std;
+int APPEND_TIME =10;
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -12,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     heartCrystal(player),
     currentRoom(nullptr) { // Initialize currentRoom pointer to nullptr
     ui->setupUi(this);
-    //add a pointer to the heartCrystal
 
+    //add a pointer to the heartCrystal
     // Load the map image
     QPixmap image("C:/Users/ticta/OneDrive/Desktop/CaveManMap.png");
 
@@ -22,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Make the QTextEdit widget read-only
     ui->OutputBox->setReadOnly(true);
+    ui->OutputBox->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     // Initialize intro text and other variables
     introText = "Welcome to CaveMan's Descent!\n\n"
@@ -54,12 +58,6 @@ MainWindow::MainWindow(QWidget *parent)
     Room* roomM = new Room("M");
     Room* roomN = new Room("N");
 
-
-
-
-
-
-
     currentRoom = roomA;
     // Set exits for each room
     roomA->setExits(nullptr, nullptr, roomB, nullptr);
@@ -81,14 +79,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Connect signals and slots
 
-    connect(ui->PickupButton, &QPushButton::clicked, this, &MainWindow::PickupButtonClicked);
-    connect(ui->RoomList, &QListWidget::itemClicked, this, &MainWindow::RoomSelectedItemChanged);
+    connect(ui->PickupButton, &QPushButton::clicked, this, &MainWindow::pickupButtonClicked);
+    connect(ui->RoomList, &QListWidget::itemClicked, this, &MainWindow::roomSelectedItemChanged);
 
-    connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::SelectedItemChanged);
+    connect(ui->PlayerList, &QListWidget::itemClicked, this, &MainWindow::selectedItemChanged);
 
-    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::UseButtonClicked);
+    connect(ui->UseButton, &QPushButton::clicked, this, &MainWindow::useButtonClicked);
 
-    connect(ui->DropButton, &QPushButton::clicked, this, &MainWindow::DropButtonClicked);
+    connect(ui->DropButton, &QPushButton::clicked, this, &MainWindow::dropButtonClicked);
+
+    connect(ui->InspectButton, &QPushButton::clicked, this, &MainWindow::inspectButtonClicked);
 
     connect(ui->NorthButton, &QPushButton::clicked, this, [this]() {
         if (goDirection("NORTH")) {
@@ -125,6 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
     updatePlayerItemList();
     currentRoom->addItem(new HeartCrystal(player));
     currentRoom->addItem(new HeartCrystal(player));
+    currentRoom->addItem(new SkipStone(player));
     updateRoomItemList();
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -139,7 +140,7 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
+void MainWindow::roomSelectedItemChanged(QListWidgetItem *item){
     if(item->text().contains("HeartCrystal") )
     {
         ui->PickupButton->setStyleSheet("background-color: red; color: white;");
@@ -147,6 +148,8 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
         // Reset the color of the UseButton to its default
         ui->UseButton->setStyleSheet("");
         ui->DropButton->setStyleSheet("");
+        ui->InspectButton->setStyleSheet("");
+
 
     }
 
@@ -158,11 +161,14 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
         // Reset the color of the UseButton to its default
         ui->UseButton->setStyleSheet("");
         ui->DropButton->setStyleSheet("");
+        ui->InspectButton->setStyleSheet("");
+
 
     }
 
     else
     {
+        ui->InspectButton->setStyleSheet("");
         // Reset the color of both buttons to their default
         ui->PickupButton->setStyleSheet("");
         ui->UseButton->setStyleSheet("");
@@ -171,10 +177,12 @@ void MainWindow::RoomSelectedItemChanged(QListWidgetItem *item){
     };
 }
 
-void MainWindow::SelectedItemChanged(QListWidgetItem *item)
+void MainWindow::selectedItemChanged(QListWidgetItem *item)
 {
     if(item->text().contains("HeartCrystal") )
     {
+        ui->InspectButton->setStyleSheet("background-color: red; color: white;");
+
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
         ui->DropButton->setStyleSheet("background-color: red; color: white;");
 
@@ -184,6 +192,8 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
 
     else if(item->text().contains("SkipStone") )
     {
+        ui->InspectButton->setStyleSheet("background-color: red; color: white;");
+
         ui->UseButton->setStyleSheet("background-color: red; color: white;");
         ui->DropButton->setStyleSheet("background-color: red; color: white;");
 
@@ -193,6 +203,8 @@ void MainWindow::SelectedItemChanged(QListWidgetItem *item)
 
     else
     {
+        ui->InspectButton->setStyleSheet("");
+        ui->DropButton->setStyleSheet("");
         // Reset the color of both buttons to their default
         ui->UseButton->setStyleSheet("");
         ui->PickupButton->setStyleSheet("");
@@ -233,16 +245,36 @@ void MainWindow::appendText(const QString &text, int delay) {
 
     // Start the QTimer with the specified delay
     timer->start(delay);
+    QScrollBar *vScrollBar = ui->OutputBox->verticalScrollBar(); // Get the vertical scroll bar
+    vScrollBar->setValue(vScrollBar->maximum()); // Scroll to the bottom
 }
 
 void MainWindow::setButtonsEnabled(bool enabled) {
     ui->NorthButton->setEnabled(enabled);
+    ui->NorthButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
     ui->SouthButton->setEnabled(enabled);
+    ui->SouthButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
     ui->EastButton->setEnabled(enabled);
+    ui->EastButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
     ui->WestButton->setEnabled(enabled);
+    ui->WestButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
     ui->PickupButton->setEnabled(enabled);
+    ui->PickupButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
     ui->UseButton->setEnabled(enabled);
+    ui->UseButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
+    ui->InspectButton->setEnabled(enabled);
+    ui->InspectButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+
+    ui->DropButton->setEnabled(enabled);
+    ui->DropButton->setStyleSheet(enabled ? "" : "background-color: grey;");
 }
+
 void MainWindow::updateRoomItemList(){
     ui->RoomList->clear();
     for(Item* i:currentRoom->getItems()){
@@ -316,7 +348,7 @@ bool MainWindow::goDirection(QString direction) {
 }
 
 
-void MainWindow::UseButtonClicked()
+void MainWindow::useButtonClicked()
 {
     // Check if the UseButton is red
     QString buttonColor = ui->UseButton->styleSheet();
@@ -337,7 +369,7 @@ void MainWindow::UseButtonClicked()
 }
 
 
-void MainWindow::DropButtonClicked()
+void MainWindow::dropButtonClicked()
 {
     // Check if the DropButton is red
     QString buttonColor = ui->DropButton->styleSheet();
@@ -380,8 +412,37 @@ void MainWindow::DropButtonClicked()
 }
 
 
+void MainWindow::inspectButtonClicked() {
+    // Check if the InspectButton is red
+    QString buttonColor = ui->InspectButton->styleSheet();
+    if (buttonColor.contains("background-color: red")) {
+        QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
+        if (selectedItem) {
+            // Retrieve the item's name
+            QString itemName = selectedItem->text();
+            int itemId = 0;
+            if (itemName.contains("HeartCrystal")) { itemId = 1; }
+            else if (itemName.contains("SkipStone")) { itemId = 2; }
 
-void MainWindow::PickupButtonClicked()
+            // Check if the selected item is valid
+            if (itemId != 0) {
+                QString description;
+                    // Try to get the item from the player's inventory
+                    Item* item = player.getItem(itemId);
+                    if (item) {
+                        description = item->getDescription();
+                    } else {
+                        description = "Item not found in the player's inventory.";
+                    }
+            appendText(description, APPEND_TIME);
+
+                }
+            }
+
+        }
+}
+
+void MainWindow::pickupButtonClicked()
 {
     // Check if the PickupButton is red
     QString buttonColor = ui->PickupButton->styleSheet();

@@ -32,14 +32,14 @@ private slots:
     void updateRoomItemList();
     void updateStats();
     void updateCurrentRoom();
-    void RoomSelectedItemChanged(QListWidgetItem *item);
+    void roomSelectedItemChanged(QListWidgetItem *item);
     //button handlers
-    void SelectedItemChanged(QListWidgetItem *item);
-    void UseButtonClicked();
-    void PickupButtonClicked();
+    void selectedItemChanged(QListWidgetItem *item);
+    void useButtonClicked();
+    void pickupButtonClicked();
     void setButtonsEnabled(bool enabled);
-    void DropButtonClicked();
-
+    void dropButtonClicked();
+    void inspectButtonClicked();
 private:
     Ui::MainWindow *ui;
     QString introText;
@@ -49,6 +49,7 @@ private:
     HeartCrystal heartCrystal;
     QLabel *imageLabel = new QLabel(this);
 
+    QScrollBar *vScrollBar;
 
 };
 
