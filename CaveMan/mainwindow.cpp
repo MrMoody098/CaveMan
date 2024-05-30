@@ -54,6 +54,7 @@ void MainWindow::initialiseGameState(){
     ui->RoomList->setSelectionMode(QAbstractItemView::SingleSelection);
     updateDirectionButtons();
 
+    DEBUG_LOG("game initialised.");
 
 }
 void MainWindow::setupConnections(){
@@ -100,6 +101,7 @@ void MainWindow::setupConnections(){
             updateCurrentRoom();
         }
     });
+    DEBUG_LOG("Connections setup complete.");
 
 }
 void MainWindow::setupRooms(){
@@ -150,6 +152,9 @@ void MainWindow::setupRooms(){
     rooms[11]->setExits(rooms[10], nullptr, nullptr, rooms[4]);
     rooms[12]->setExits(rooms[9], nullptr, rooms[13], nullptr);
     rooms[13]->setExits(rooms[12], nullptr, nullptr, nullptr);
+
+    DEBUG_LOG("Setup rooms complete.");
+
 }
 
 MainWindow::~MainWindow()

@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     Character.cpp \
+    bag.cpp \
     enemy.cpp \
     gamemanager.cpp \
     heartcrystal.cpp \
@@ -22,10 +23,12 @@ SOURCES += \
 
 HEADERS += \
     Character.h \
+    bag.h \
     enemy.h \
     gamemanager.h \
     heartcrystal.h \
     item.h \
+    itemexception.h \
     mainwindow.h \
     player.h \
     room.h \

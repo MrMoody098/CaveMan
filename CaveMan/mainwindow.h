@@ -16,6 +16,16 @@ QT_END_NAMESPACE
 // Forward declaration
 class SkipStone;
 
+// Enable debuggin if debug mode is defined
+
+#ifdef DEBUG_MODE
+#include <QDebug> //
+#define DEBUG_LOG(x) qDebug() << x // outputs debugs normally
+#else
+#define DEBUG_LOG(x)
+#endif
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -26,6 +36,7 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    friend class SkipStone;
 
 
 signals:
