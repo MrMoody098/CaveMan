@@ -22,6 +22,8 @@ public:
     std::vector<Item*> getItems();
     void removeItem(int id);
 
+    Character& operator+(Item* newItem);
+
 protected:
     int health;
     int coins;

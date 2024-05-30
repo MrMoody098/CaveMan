@@ -17,10 +17,7 @@ public:
     Item( int value,QString description,QString name,int quantity,int id,int isConsumable);
     Item(const Item& other);
     Item(Item* other);
-
-
-
-    //Release Memeory using descturctor
+    Item& operator=(const Item& other); // Assignment operator
 
     int getValue();
     QString getDescription();

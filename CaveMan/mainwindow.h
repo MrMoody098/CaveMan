@@ -1,70 +1,87 @@
 #ifndef MAINWINDOW_H
-#define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QListWidgetItem>
+#include <QPushButton>  // Include QPushButton header
 #include <QTimer>
-#include <room.h>
-#include <player.h>
-#include <QLabel>
-#include <QPixmap>
-#include <heartcrystal.h>
-
+#include "player.h"
+#include "room.h"
+#include "enemy.h"
+#include "heartcrystal.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+
+// Forward declaration
+class SkipStone;
+
+namespace Ui {
+class MainWindow;
+}
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+
+signals:
+    void appended();
 private slots:
-    void appendText(const QString &text);
-
-    void appendText(const QString &text, int delay);
-
-    //update Ui methods
-    void updatePlayerItemList();
-    void updateRoomItemList();
-    void updateStats();
-    void updateCurrentRoom();
-    void roomSelectedItemChanged(QListWidgetItem *item);
-    //button handlers
-    void selectedItemChanged(QListWidgetItem *item);
-    void useButtonClicked();
+    // Slot functions for button clicks
     void pickupButtonClicked();
-    void setButtonsEnabled(bool enabled);
+    void useButtonClicked();
     void dropButtonClicked();
     void inspectButtonClicked();
     void fight();
     void flee();
-
     void onRockSelected();
     void onPaperSelected();
     void onScissorsSelected();
 
+    // Slot functions for item selection changes
+    void roomSelectedItemChanged(QListWidgetItem *item);
+    void selectedItemChanged(QListWidgetItem *item);
+
 private:
-    void enemyDead();
-    void gameOver();
-    bool goDirection(QString direction);
     Ui::MainWindow *ui;
-    QString introText;
-    int currentIndex;
-    Room* currentRoom;
-    Room* lastRoom;
     Player player;
     HeartCrystal heartCrystal;
-    QLabel *imageLabel = new QLabel(this);
-    void challenge(bool condition);
-    QScrollBar *vScrollBar;
-    bool fighting;
+    Room *currentRoom;
+    Room *lastRoom;
+    bool fighting = false;
+    int currentIndex;
+
+    // Helper functions
+    void setupRooms();
+    void setupConnections();
+    void initializeGameState();
+    void appendText(const QString &text);
+    void appendText(const QString &text, int delay);
+    void setButtonsEnabled(bool enabled);
+    void updateRoomItemList();
+    void updatePlayerItemList();
+    void updateStats();
+    void updateCurrentRoom();
     void updateDirectionButtons();
-    QString choiceToString(int choice);
-    QString determineWinner(int playerChoice, int enemyChoice);
+    void updateDirectionButton(QPushButton *button, Room *room);
+    void updateButtonStyles(const QString &itemText, QPushButton *button, const QString &style);
+    void resetButtonStyles();
+    bool goDirection(QString direction);
+    void challenge(bool condition);
     void handlePlayerChoice(int playerChoice);
+    QString determineWinner(int playerChoice, int enemyChoice);
+    void enemyDead();
+    void gameOver();
+    QString choiceToString(int choice);
+    int getItemId(const QString &itemName);
+    void transferItemFromRoomToPlayer(int itemId);
+    void transferItemFromPlayerToRoom(int itemId);
+    void setMovementButtonsEnabled(bool enabled);
+    void setCombatButtonsEnabled(bool enabled);
 
 
 };

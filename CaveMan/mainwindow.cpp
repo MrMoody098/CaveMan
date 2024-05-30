@@ -16,21 +16,13 @@ MainWindow::MainWindow(QWidget *parent)
     player(),
     heartCrystal(player),
     currentRoom(nullptr),
-    lastRoom(nullptr){ // Initialize currentRoom pointer to nullptr
+    lastRoom(nullptr){
     ui->setupUi(this);
-    bool fto = true;
-    bool &fightOver = fto;
-    //add a pointer to the heartCrystal
-    // Load the map image
-    QPixmap image("C:/Users/ticta/OneDrive/Desktop/CaveManMap.png");
 
-    // Initialize the countdown timer
-    // Make the QTextEdit widget read-only
     ui->OutputBox->setReadOnly(true);
     ui->OutputBox->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
-    // Initialize intro text and other variables
-    introText = "Welcome to CaveMan's Descent!\n\n"
+    QString introText = "Welcome to CaveMan's Descent!\n\n"
                 "CaveMan, a fearless explorer of caves, finds himself plunging into darkness after slipping down a mineshaft during one of his usual adventures.\n\n"
                 "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
                 "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
@@ -39,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     Room* roomA = new Room("A");
     Room* roomB = new Room("B");
     roomB->setDescription("A dusty hallway");
-    roomB->addItem(new SkipStone(fightOver));
+    roomB->addItem(new SkipStone(fightOver,this));
     Room* roomC = new Room("C");
     roomC->setDescription("A large mineshaft.");
     Enemy* roomCEnemy = new Enemy("Chris the cryptid","\n a legendary creature rumored to lurk in the depths of dark forests and misty swamps.");
@@ -51,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     Room* roomD = new Room("D");
     roomD->setDescription("A smelly cubbord there is a little spider in the corner.");
-    roomD->addItem(new SkipStone(fightOver));
+    roomD->addItem(new SkipStone(fightOver,this));
 
 
     Room* roomE = new Room("E");
@@ -135,11 +127,11 @@ MainWindow::MainWindow(QWidget *parent)
     updateStats();
     HeartCrystal* hc = &heartCrystal;
     hc->setValues(1, 8, 8);
-    player.addItem(hc);
+    player+hc;
     updatePlayerItemList();
     currentRoom->addItem(new HeartCrystal(player));
     currentRoom->addItem(new HeartCrystal(player));
-    currentRoom->addItem(new SkipStone(fightOver));
+    currentRoom->addItem(new SkipStone(fightOver,this));
     updateRoomItemList();
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -208,8 +200,8 @@ void MainWindow::selectedItemChanged(QListWidgetItem *item)
     else if(item->text().contains("SkipStone") )
     {
         ui->InspectButton->setStyleSheet("background-color: red; color: white;");
+        if(!fightOver)ui->UseButton->setStyleSheet("background-color: red; color: white;");
 
-        ui->UseButton->setStyleSheet("background-color: red; color: white;");
         ui->DropButton->setStyleSheet("background-color: red; color: white;");
 
         // Reset the color of the PickupButton to its default
@@ -300,7 +292,7 @@ void MainWindow::appendText(const QString &text, int delay) {
 }
 
 void MainWindow::setButtonsEnabled(bool enabled) {
-    if(!fighting){
+    if(fighting){
     ui->NorthButton->setEnabled(enabled);
 
     ui->SouthButton->setEnabled(enabled);
@@ -309,6 +301,12 @@ void MainWindow::setButtonsEnabled(bool enabled) {
 
     ui->WestButton->setEnabled(enabled);
 }
+    ui->RockButton->setEnabled(enabled);
+
+    ui->ScissorsButton->setEnabled(enabled);
+
+    ui->PaperButton_3->setEnabled(enabled);
+
     ui->PickupButton->setEnabled(enabled);
     ui->PickupButton->setStyleSheet(enabled ? "" : "background-color: grey;");
 
@@ -490,7 +488,7 @@ void MainWindow::dropButtonClicked()
                     if(player.getItem(itemId)->getQuantity()==0){return;}
                         player.getItem(itemId)->decQuantity();
                         if(itemId==1){currentRoom->addItem(new HeartCrystal(player));};
-                        if(itemId==2){currentRoom->addItem(new SkipStone(fightOver));};
+                        if(itemId==2){currentRoom->addItem(new SkipStone(fightOver,this));};
 
                 }
             }
@@ -554,6 +552,7 @@ void MainWindow::flee(){
 
 void MainWindow::fight(){
     fightOver = false;
+    fighting = true;
     Enemy* enemy = currentRoom->getEnemy();
     QString output ="\n\n------------------\n\n"+enemy->getName()+": \"On the Count of Three Shoot\"";
     appendText(output,APPEND_TIME);
@@ -634,7 +633,7 @@ void MainWindow::pickupButtonClicked()
                 if(skipStone)
                 {
                     // Add the SkipStone to the player's inventory
-                    player.addItem(new SkipStone(fightOver));
+                    player.addItem(new SkipStone(fightOver,this));
                     updateStats();
                     // Decrement the SkipStone's quantity in the room if it's greater than 0
                     if(skipStone->getQuantity() > 0)
@@ -685,6 +684,7 @@ void MainWindow::handlePlayerChoice(int playerChoice) {
 
     if (result == "Player wins!") {
         currentRoom->getEnemy()->subtractHealth(1); //
+        updateStats();
         if (currentRoom->getEnemy()->getHealth() <= 0) {
             enemyDead();
         }
@@ -699,20 +699,18 @@ void MainWindow::handlePlayerChoice(int playerChoice) {
 }
 
 void MainWindow::enemyDead(){
+
     Enemy* enemy =currentRoom->getEnemy();
     //print you have defeated {enemy} they have dropped {itmes}
-    appendText("You have Defeated" + enemy->getName());
-    appendText("The enemy Dropped these items:");
     std::vector<Item*> itemsToDrop = enemy->getItems(); // Collect items before modifying the enemy
+    QString output = "You have Defeated" + enemy->getName()+ "\nThe enemy Dropped these items:\n";
 
     for (Item* i : itemsToDrop) {
-        appendText(i->getName());
+        output += i->getName() + " x" + QString::number(i->getQuantity()) + "\n";
         Item* copiedItem = new Item(*i); // Create a copy using the copy constructor
         currentRoom->addItem(copiedItem);
     }
-
-    delete enemy ;
-
+    delete enemy;
     fightOver=true;
     currentRoom->setEnemy(nullptr);
     challenge(false);
@@ -720,6 +718,7 @@ void MainWindow::enemyDead(){
     updateStats();
     updateRoomItemList();
     setButtonsEnabled(true);
+    appendText(output);
 }
 
 QString MainWindow::choiceToString(int choice) {

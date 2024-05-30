@@ -20,6 +20,11 @@ void Character::subtractHealth(int amount) {
         health = 0;
     }
 }
+// Operator overload for adding an item to the inventory
+Character& Character::operator+(Item* newItem) {
+    this->addItem(newItem);
+    return *this;
+}
 
 Item* Character::getItem(int id){
     for(Item* i:items){

@@ -16,6 +16,15 @@ Item::Item(const Item& other) {
     this->bitStruct = other.bitStruct;
 }
 
+Item& Item::operator=(const Item& other) {
+    if (this != &other) {
+        this->description = other.description;
+        this->name = other.name;
+        this->bitStruct = other.bitStruct;
+    }
+    return *this;
+}
+
 // Deep copy constructor
 Item::Item(Item* other) {
     this->description = QString(other->description);
