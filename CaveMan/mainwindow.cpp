@@ -2,13 +2,14 @@
 #include "ui_mainwindow.h"
 #include "heartcrystal.h"
 #include <QLabel>
-#include <iostream>
 #include <QPixmap>
 #include "skipstone.h"
 #include <QScrollBar>
+#include <QRandomGenerator>
 using namespace std;
 int APPEND_TIME =10;
-
+bool fto = true;
+bool &fightOver = fto;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -17,13 +18,13 @@ MainWindow::MainWindow(QWidget *parent)
     currentRoom(nullptr),
     lastRoom(nullptr){ // Initialize currentRoom pointer to nullptr
     ui->setupUi(this);
-
-    fighting = false;
+    bool fto = true;
+    bool &fightOver = fto;
     //add a pointer to the heartCrystal
     // Load the map image
     QPixmap image("C:/Users/ticta/OneDrive/Desktop/CaveManMap.png");
 
-
+    // Initialize the countdown timer
     // Make the QTextEdit widget read-only
     ui->OutputBox->setReadOnly(true);
     ui->OutputBox->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -38,18 +39,19 @@ MainWindow::MainWindow(QWidget *parent)
     Room* roomA = new Room("A");
     Room* roomB = new Room("B");
     roomB->setDescription("A dusty hallway");
-    roomB->addItem(new SkipStone(player));
+    roomB->addItem(new SkipStone(fightOver));
     Room* roomC = new Room("C");
     roomC->setDescription("A large mineshaft.");
     Enemy* roomCEnemy = new Enemy("Chris the cryptid","\n a legendary creature rumored to lurk in the depths of dark forests and misty swamps.");
-    // roomCEnemy->addItem(new HeartCrystal(player));
-    // roomCEnemy->addItem(new HeartCrystal(player));
+    roomCEnemy->addItem( new HeartCrystal(player));
+    roomCEnemy->addItem( new HeartCrystal(player));
+    roomCEnemy->setHealth(2);
     roomC->setEnemy(roomCEnemy);
     qDebug() << roomC->enemyInRoom();
 
     Room* roomD = new Room("D");
     roomD->setDescription("A smelly cubbord there is a little spider in the corner.");
-    roomD->addItem(new SkipStone(player));
+    roomD->addItem(new SkipStone(fightOver));
 
 
     Room* roomE = new Room("E");
@@ -97,6 +99,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->FightButton, &QPushButton::clicked, this, &MainWindow::fight);
     connect(ui->FleeButton, &QPushButton::clicked, this, &MainWindow::flee);
+    // Connect the clicked signals of radio buttons to slots
+    connect(ui->RockButton, &QPushButton::clicked, this, &MainWindow::onRockSelected);
+    connect(ui->PaperButton_3, &QPushButton::clicked, this, &MainWindow::onPaperSelected);
+    connect(ui->ScissorsButton, &QPushButton::clicked, this, &MainWindow::onScissorsSelected);
 
     connect(ui->NorthButton, &QPushButton::clicked, this, [this]() {
         if (goDirection("NORTH")) {
@@ -133,11 +139,12 @@ MainWindow::MainWindow(QWidget *parent)
     updatePlayerItemList();
     currentRoom->addItem(new HeartCrystal(player));
     currentRoom->addItem(new HeartCrystal(player));
-    currentRoom->addItem(new SkipStone(player));
+    currentRoom->addItem(new SkipStone(fightOver));
     updateRoomItemList();
     // Set selection mode to allow only one item to be selected at a time
     ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->RoomList->setSelectionMode(QAbstractItemView::SingleSelection);
+    updateDirectionButtons();
 
 
 }
@@ -219,6 +226,35 @@ void MainWindow::selectedItemChanged(QListWidgetItem *item)
     };
 }
 
+void MainWindow::appendText(const QString &text) {
+    // Disable buttons while displaying text
+    setButtonsEnabled(false);
+
+    // Create a QTimer object
+    QTimer *timer = new QTimer(this);
+
+    // Connect the timeout signal of the QTimer to a lambda function
+    connect(timer, &QTimer::timeout, [=]() {
+        // Append the entire text to the OutputBox
+        ui->OutputBox->insertPlainText("\n" + text);
+
+        // Scroll to the bottom
+        QScrollBar *vScrollBar = ui->OutputBox->verticalScrollBar(); // Get the vertical scroll bar
+        vScrollBar->setValue(vScrollBar->maximum()); // Scroll to the bottom
+
+        // Stop the timer
+        timer->stop();
+
+        // Delete timer to clean up resources
+        timer->deleteLater();
+
+        // Re-enable buttons after text display
+        setButtonsEnabled(true);
+    });
+
+    // Start the QTimer with a 1-second delay
+    timer->start(1000);
+}
 
 void MainWindow::appendText(const QString &text, int delay) {
     // Disable buttons while displaying intro text
@@ -236,8 +272,8 @@ void MainWindow::appendText(const QString &text, int delay) {
         if (currentIndex < text.length()) {
             // Append the current character to the OutputBox
             ui->OutputBox->insertPlainText(text.at(currentIndex));
+            //scroll every 35 characters
             if (currentIndex % 35 == 0) {
-                // Perform the desired action here
                 QScrollBar *vScrollBar = ui->OutputBox->verticalScrollBar(); // Get the vertical scroll bar
                 vScrollBar->setValue(vScrollBar->maximum()); // Scroll to the bottom
             }
@@ -266,16 +302,12 @@ void MainWindow::appendText(const QString &text, int delay) {
 void MainWindow::setButtonsEnabled(bool enabled) {
     if(!fighting){
     ui->NorthButton->setEnabled(enabled);
-    ui->NorthButton->setStyleSheet(enabled ? "" : "background-color: grey;");
 
     ui->SouthButton->setEnabled(enabled);
-    ui->SouthButton->setStyleSheet(enabled ? "" : "background-color: grey;");
 
     ui->EastButton->setEnabled(enabled);
-    ui->EastButton->setStyleSheet(enabled ? "" : "background-color: grey;");
 
     ui->WestButton->setEnabled(enabled);
-    ui->WestButton->setStyleSheet(enabled ? "" : "background-color: grey;");
 }
     ui->PickupButton->setEnabled(enabled);
     ui->PickupButton->setStyleSheet(enabled ? "" : "background-color: grey;");
@@ -313,15 +345,48 @@ void MainWindow::updateStats(){
     QString coins = QString::number(player.getCoins());
     ui->Health->setText(health);
     ui->Coins->setText(coins);
-
+    if(!fightOver) ui->EnemyHealth->setText(QString::number(currentRoom->getEnemy()->getHealth()));
 }
 
 void MainWindow::updateCurrentRoom() {
     if (currentRoom != nullptr) {
         ui->CurrentRoom->setText(currentRoom->getName());
+
     } else {
         qDebug() << "Current room is null!";
     }
+}
+
+void MainWindow::updateDirectionButtons(){
+    //NORTH
+    if(currentRoom->getNorth()!=nullptr){
+        ui->NorthButton->setStyleSheet("background-color: #FFCCCC; border-radius: 10px;");
+    }
+    else if(currentRoom->getNorth()==nullptr){
+        ui->NorthButton->setStyleSheet("");
+    };
+    //SOUTH
+    if(currentRoom->getSouth()!=nullptr){
+        ui->SouthButton->setStyleSheet("background-color: #FFCCCC; border-radius: 10px");
+    }
+    else if(currentRoom->getSouth()==nullptr){
+        ui->SouthButton->setStyleSheet("");
+    };
+    //EAST
+    if(currentRoom->getEast()!=nullptr){
+        ui->EastButton->setStyleSheet("background-color: #FFCCCC; border-radius: 10px");
+    }
+    else if(currentRoom->getEast()==nullptr){
+        ui->EastButton->setStyleSheet("");
+    };
+    //WEST
+    if(currentRoom->getWest()!=nullptr){
+        ui->SouthButton->setStyleSheet("background-color: #FFCCCC; border-radius: 10px");
+    }
+    else if(currentRoom->getWest()==nullptr){
+        ui->SouthButton->setStyleSheet("");
+    };
+
 }
 
 bool MainWindow::goDirection(QString direction) {
@@ -353,8 +418,15 @@ bool MainWindow::goDirection(QString direction) {
         currentRoom = nextRoom;
         updateCurrentRoom();        // Update the UI to display the new current room
         updateRoomItemList();
-        if(currentRoom->enemyInRoom()){qDebug() <<"enemy found";Enemy *Enemy = currentRoom->getEnemy(); appendText(currentRoom->getDescription() + currentRoom->itemListToQString()+"\n"+Enemy->getName()+" "+Enemy->getDescription()+"\n",APPEND_TIME);challenge();}
-        else{appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);}
+        if(currentRoom->enemyInRoom()){
+            qDebug() <<"enemy found";
+            Enemy *Enemy = currentRoom->getEnemy();
+            appendText(currentRoom->getDescription() + currentRoom->itemListToQString()+"\n"+Enemy->getName()+" "+Enemy->getDescription()+"\n",APPEND_TIME);
+            challenge(true);
+        }
+        else{
+            appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
+        }
         return true; // Return true to indicate successful direction change
     } else {
         qDebug() << "Cannot move in the specified direction.";
@@ -376,7 +448,8 @@ void MainWindow::useButtonClicked()
         QListWidgetItem *selectedItem = ui->PlayerList->currentItem();
         if(selectedItem && selectedItem->text().contains("HeartCrystal")){ itemId =1;}
         else if(selectedItem && selectedItem->text().contains("SkipStone")){ itemId =2;}
-        if(itemId){
+        if(itemId)
+        {
             // Use the Item
             player.getItem(itemId)->use();
             updateStats();
@@ -417,7 +490,7 @@ void MainWindow::dropButtonClicked()
                     if(player.getItem(itemId)->getQuantity()==0){return;}
                         player.getItem(itemId)->decQuantity();
                         if(itemId==1){currentRoom->addItem(new HeartCrystal(player));};
-                        if(itemId==2){currentRoom->addItem(new SkipStone(player));};
+                        if(itemId==2){currentRoom->addItem(new SkipStone(fightOver));};
 
                 }
             }
@@ -459,7 +532,6 @@ void MainWindow::inspectButtonClicked() {
 
                 }
             }
-
         }
 }
 
@@ -473,58 +545,53 @@ void MainWindow::flee(){
         updateRoomItemList();
         appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
         fighting = false;
-        ui->NorthButton->setEnabled(true);
-        ui->NorthButton->setStyleSheet("");
+        challenge(false);
 
-        ui->SouthButton->setEnabled(true);
-        ui->SouthButton->setStyleSheet("");
-
-        ui->EastButton->setEnabled(true);
-        ui->EastButton->setStyleSheet("");
-
-        ui->WestButton->setEnabled(true);
-        ui->WestButton->setStyleSheet("");
-
-        ui->FleeButton->setEnabled(false);
-        ui->FleeButton->setStyleSheet("background-color: grey;");
-
-        ui->FightButton->setEnabled(false);
-        ui->FightButton->setStyleSheet("background-color: grey;");
-
+        ui->stackedWidget->setCurrentIndex(0);
     }
 }
+
+
 void MainWindow::fight(){
-    // Check if the InspectButton is red
-    QString buttonColor = ui->FightButton->styleSheet();
-    if (buttonColor.contains("background-color: red")) {
-        //i want to replace my panel with the fighting buttons
-
-    }
+    fightOver = false;
+    Enemy* enemy = currentRoom->getEnemy();
+    QString output ="\n\n------------------\n\n"+enemy->getName()+": \"On the Count of Three Shoot\"";
+    appendText(output,APPEND_TIME);
+    qDebug()<<"fighting";
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->FightButton->setEnabled(false);
+    ui->FightButton->setStyleSheet("background-color: grey;");
+    updateStats();
 }
-void MainWindow::challenge(){
-    fighting = true;
-    //check if the buttons are enabled first meaning were done appending text
-        //next make movement buttons unusable
+void MainWindow::challenge(bool condition) {
+    // Check the condition
+    if (condition) {
+        // Disable movement buttons
         ui->NorthButton->setEnabled(false);
-        ui->NorthButton->setStyleSheet("background-color: grey;");
-
         ui->SouthButton->setEnabled(false);
-        ui->SouthButton->setStyleSheet("background-color: grey;");
-
         ui->EastButton->setEnabled(false);
-        ui->EastButton->setStyleSheet("background-color: grey;");
-
         ui->WestButton->setEnabled(false);
-        ui->WestButton->setStyleSheet("background-color: grey;");
 
-        //change color of flee and fight buttons
-
+        // Enable and change color of flee and fight buttons
         ui->FleeButton->setEnabled(true);
         ui->FleeButton->setStyleSheet("background-color: red;");
 
         ui->FightButton->setEnabled(true);
         ui->FightButton->setStyleSheet("background-color: red;");
+    } else {
+        // Enable movement buttons
+        ui->NorthButton->setEnabled(true);
+        ui->SouthButton->setEnabled(true);
+        ui->EastButton->setEnabled(true);
+        ui->WestButton->setEnabled(true);
 
+        // Disable and reset color of flee and fight buttons
+        ui->FleeButton->setEnabled(false);
+        ui->FleeButton->setStyleSheet("background-color: grey;");
+
+        ui->FightButton->setEnabled(false);
+        ui->FightButton->setStyleSheet("background-color: grey;");
+    }
 }
 
 void MainWindow::pickupButtonClicked()
@@ -548,11 +615,11 @@ void MainWindow::pickupButtonClicked()
                 {
                     if(player.getItem(1)->getQuantity()==0){player.addItem(heartCrystal);currentRoom->removeItem(heartCrystal->getId());}
                     else{
-                    {
-                        heartCrystal->decQuantity();
-                        player.getItem(1)->incQuantity();
-                    }
-                    if(heartCrystal->getQuantity()==0){currentRoom->removeItem(heartCrystal->getId());};
+                        {
+                            heartCrystal->decQuantity();
+                            player.getItem(1)->incQuantity();
+                        }
+                        if(heartCrystal->getQuantity()==0){currentRoom->removeItem(heartCrystal->getId());};
                     }
                     // Update the item lists
                     updateStats();
@@ -567,7 +634,7 @@ void MainWindow::pickupButtonClicked()
                 if(skipStone)
                 {
                     // Add the SkipStone to the player's inventory
-                    player.addItem(new SkipStone(player));
+                    player.addItem(new SkipStone(fightOver));
                     updateStats();
                     // Decrement the SkipStone's quantity in the room if it's greater than 0
                     if(skipStone->getQuantity() > 0)
@@ -582,5 +649,90 @@ void MainWindow::pickupButtonClicked()
             }
         }
     }
+}
+
+void MainWindow::onRockSelected() {
+    int playerChoice = 1;
+    handlePlayerChoice(playerChoice);
+}
+
+void MainWindow::onPaperSelected() {
+    int playerChoice = 0;
+    handlePlayerChoice(playerChoice);
+}
+
+void MainWindow::onScissorsSelected() {
+    int playerChoice = 2;
+    handlePlayerChoice(playerChoice);
+}
+
+QString MainWindow::determineWinner(int playerChoice, int enemyChoice) {
+    int result = (playerChoice - enemyChoice + 3) % 3;
+    if (result == 0) {
+        return "It's a tie!";
+    } else if (result == 1) {
+        return "Player wins!";
+    } else {
+        return "Enemy wins!";
+    }
+}
+
+void MainWindow::handlePlayerChoice(int playerChoice) {
+    int enemyChoice = QRandomGenerator::global()->bounded(3);
+    QString result = determineWinner(playerChoice, enemyChoice);
+
+    appendText("-----------\nPlayer chose: " + choiceToString(playerChoice) + "\n"+"Enemy chose: " + choiceToString(enemyChoice) + "\n"+result + "\n----------\n",APPEND_TIME);
+
+    if (result == "Player wins!") {
+        currentRoom->getEnemy()->subtractHealth(1); //
+        if (currentRoom->getEnemy()->getHealth() <= 0) {
+            enemyDead();
+        }
+    } else if (result == "Enemy wins!") {
+        player.subtractHealth(1);
+        updateStats();
+        if (player.getHealth() <= 0) {
+            appendText("You have been defeated this round!\n");
+            gameOver();
+        }
+    }
+}
+
+void MainWindow::enemyDead(){
+    Enemy* enemy =currentRoom->getEnemy();
+    //print you have defeated {enemy} they have dropped {itmes}
+    appendText("You have Defeated" + enemy->getName());
+    appendText("The enemy Dropped these items:");
+    std::vector<Item*> itemsToDrop = enemy->getItems(); // Collect items before modifying the enemy
+
+    for (Item* i : itemsToDrop) {
+        appendText(i->getName());
+        Item* copiedItem = new Item(*i); // Create a copy using the copy constructor
+        currentRoom->addItem(copiedItem);
+    }
+
+    delete enemy ;
+
+    fightOver=true;
+    currentRoom->setEnemy(nullptr);
+    challenge(false);
+    ui->stackedWidget->setCurrentIndex(0);
+    updateStats();
+    updateRoomItemList();
+    setButtonsEnabled(true);
+}
+
+QString MainWindow::choiceToString(int choice) {
+    switch (choice) {
+    case 0: return "Paper";
+    case 1: return "Rock";
+    case 2: return "Scissors";
+    default: return "";
+    }
+}
+
+void MainWindow::gameOver(){
+    appendText("you DIED!!! game OVER!");
+    fightOver=true;
 }
 

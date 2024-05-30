@@ -9,6 +9,23 @@ Item::Item(int value, QString description,QString name,int quantity,int id,int i
     this->bitStruct.isConsumable=isConsumable;
 }
 
+// Shallow copy constructor
+Item::Item(const Item& other) {
+    this->description = other.description;
+    this->name = other.name;
+    this->bitStruct = other.bitStruct;
+}
+
+// Deep copy constructor
+Item::Item(Item* other) {
+    this->description = QString(other->description);
+    this->name = QString(other->name);
+    this->bitStruct.id = other->bitStruct.id;
+    this->bitStruct.value = other->bitStruct.value;
+    this->bitStruct.quantity = other->bitStruct.quantity;
+    this->bitStruct.isConsumable = other->bitStruct.isConsumable;
+}
+
 QString Item:: getName(){
     return this->name;
 }

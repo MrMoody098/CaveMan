@@ -6,6 +6,7 @@ class Enemy : public Character
 {
 public:
     Enemy(QString name, QString description);
+    ~Enemy() override;
     QString getName();
     QString getDescription();
     bool isAlive();

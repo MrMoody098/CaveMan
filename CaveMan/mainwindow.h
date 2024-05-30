@@ -22,6 +22,7 @@ public:
     ~MainWindow();
 
 private slots:
+    void appendText(const QString &text);
 
     void appendText(const QString &text, int delay);
 
@@ -40,9 +41,15 @@ private slots:
     void inspectButtonClicked();
     void fight();
     void flee();
-private:
-    bool goDirection(QString direction);
 
+    void onRockSelected();
+    void onPaperSelected();
+    void onScissorsSelected();
+
+private:
+    void enemyDead();
+    void gameOver();
+    bool goDirection(QString direction);
     Ui::MainWindow *ui;
     QString introText;
     int currentIndex;
@@ -51,9 +58,14 @@ private:
     Player player;
     HeartCrystal heartCrystal;
     QLabel *imageLabel = new QLabel(this);
-    void challenge();
+    void challenge(bool condition);
     QScrollBar *vScrollBar;
     bool fighting;
+    void updateDirectionButtons();
+    QString choiceToString(int choice);
+    QString determineWinner(int playerChoice, int enemyChoice);
+    void handlePlayerChoice(int playerChoice);
+
 
 };
 

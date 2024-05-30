@@ -1,16 +1,15 @@
 #ifndef SKIPSTONE_H
 #define SKIPSTONE_H
+
 #include "item.h"
-#include "player.h"
-class SkipStone :public Item
-{
+
+class SkipStone : public Item {
 public:
-    SkipStone(Player& player) ;
-    // Override the use function to add health
-    void use() override;
-    Player& getPlayer();
+    SkipStone(bool &fightOver); // Constructor to initialize fightOver
+    virtual ~SkipStone();
+    void use(); // No need to pass fightOver as an argument here
 private:
-    Player& player;
+    bool &fightOver; // Member variable to store the reference to fightOver
 };
 
 #endif // SKIPSTONE_H
