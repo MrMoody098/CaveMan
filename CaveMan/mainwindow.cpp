@@ -17,65 +17,46 @@ MainWindow::MainWindow(QWidget *parent)
     heartCrystal(player),
     currentRoom(nullptr),
     lastRoom(nullptr){
+
     ui->setupUi(this);
 
     ui->OutputBox->setReadOnly(true);
     ui->OutputBox->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
+    setupRooms();
+    setupConnections();
+    initialiseGameState();
+
     QString introText = "Welcome to CaveMan's Descent!\n\n"
-                "CaveMan, a fearless explorer of caves, finds himself plunging into darkness after slipping down a mineshaft during one of his usual adventures.\n\n"
-                "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
-                "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
+                        "CaveMan, a fearless explorer of caves, finds himself plunging into darkness after slipping down a mineshaft during one of his usual adventures.\n\n"
+                        "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
+                        "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
 
-    // Create rooms dynamically
-    Room* roomA = new Room("A");
-    Room* roomB = new Room("B");
-    roomB->setDescription("A dusty hallway");
-    roomB->addItem(new SkipStone(fightOver,this));
-    Room* roomC = new Room("C");
-    roomC->setDescription("A large mineshaft.");
-    Enemy* roomCEnemy = new Enemy("Chris the cryptid","\n a legendary creature rumored to lurk in the depths of dark forests and misty swamps.");
-    roomCEnemy->addItem( new HeartCrystal(player));
-    roomCEnemy->addItem( new HeartCrystal(player));
-    roomCEnemy->setHealth(2);
-    roomC->setEnemy(roomCEnemy);
-    qDebug() << roomC->enemyInRoom();
-
-    Room* roomD = new Room("D");
-    roomD->setDescription("A smelly cubbord there is a little spider in the corner.");
-    roomD->addItem(new SkipStone(fightOver,this));
+    appendText(introText, APPEND_TIME);
 
 
-    Room* roomE = new Room("E");
-    Room* roomF = new Room("F");
-    Room* roomG = new Room("G");
-    Room* roomH = new Room("H");
-    Room* roomI = new Room("I");
-    Room* roomJ = new Room("J");
-    Room* roomK = new Room("K");
-    Room* roomL = new Room("L");
-    Room* roomM = new Room("M");
-    Room* roomN = new Room("N");
-
-    currentRoom = roomA;
-    // Set exits for each room
-    roomA->setExits(nullptr, nullptr, roomB, nullptr);
-    roomB->setExits(roomA, nullptr, roomC, nullptr);
-    roomC->setExits(roomB, roomF, roomE, roomD);
-    roomD->setExits(nullptr, roomC, nullptr, nullptr);
-    roomE->setExits(roomC, roomL, nullptr, nullptr);
-    roomF->setExits(nullptr, nullptr, roomG, roomC);
-    roomG->setExits(roomF, roomH, nullptr, nullptr);
-    roomH->setExits(roomI, roomJ, roomG, nullptr);
-    roomI->setExits(nullptr, nullptr, roomH, nullptr);
-    roomJ->setExits(nullptr, roomM, roomK, roomH);
-    roomK->setExits(roomJ,nullptr,roomL,nullptr);
-    roomL->setExits(roomK,nullptr,nullptr,roomE);
-    roomM->setExits(roomJ,nullptr,roomN,nullptr);
-    roomN->setExits(roomM,nullptr,nullptr,nullptr);
+}
+void MainWindow::initialiseGameState(){
+    // Call the appendText function with the intro text
+    player.setHealth(10);
+    player.addCoins(1);
+    updateStats();
+    HeartCrystal* hc = &heartCrystal;
+    hc->setValues(1, 8, 8);
+    player+hc;
+    updatePlayerItemList();
+    currentRoom->addItem(new HeartCrystal(player));
+    currentRoom->addItem(new HeartCrystal(player));
+    currentRoom->addItem(new SkipStone(fightOver,this));
+    updateRoomItemList();
+    // Set selection mode to allow only one item to be selected at a time
+    ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->RoomList->setSelectionMode(QAbstractItemView::SingleSelection);
+    updateDirectionButtons();
 
 
-
+}
+void MainWindow::setupConnections(){
     // Connect signals and slots
 
     connect(ui->PickupButton, &QPushButton::clicked, this, &MainWindow::pickupButtonClicked);
@@ -120,25 +101,55 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
-    // Call the appendText function with the intro text
-    player.setHealth(10);
-    player.addCoins(1);
-    appendText(introText, APPEND_TIME);
-    updateStats();
-    HeartCrystal* hc = &heartCrystal;
-    hc->setValues(1, 8, 8);
-    player+hc;
-    updatePlayerItemList();
-    currentRoom->addItem(new HeartCrystal(player));
-    currentRoom->addItem(new HeartCrystal(player));
-    currentRoom->addItem(new SkipStone(fightOver,this));
-    updateRoomItemList();
-    // Set selection mode to allow only one item to be selected at a time
-    ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->RoomList->setSelectionMode(QAbstractItemView::SingleSelection);
-    updateDirectionButtons();
+}
+void MainWindow::setupRooms(){
+    // Create rooms dynamically and store them in the array
+    rooms[0] = new Room("A");
+    rooms[1] = new Room("B");
+    rooms[2] = new Room("C");
+    rooms[3] = new Room("D");
+    rooms[4] = new Room("E");
+    rooms[5] = new Room("F");
+    rooms[6] = new Room("G");
+    rooms[7] = new Room("H");
+    rooms[8] = new Room("I");
+    rooms[9] = new Room("J");
+    rooms[10] = new Room("K");
+    rooms[11] = new Room("L");
+    rooms[12] = new Room("M");
+    rooms[13] = new Room("N");
 
+    rooms[1]->setDescription("A dusty hallway");
+    rooms[1]->addItem(new SkipStone(fightOver, this));
 
+    rooms[2]->setDescription("A large mineshaft.");
+    Enemy* roomCEnemy = new Enemy("Chris the cryptid", "\n a legendary creature rumored to lurk in the depths of dark forests and misty swamps.");
+    roomCEnemy->addItem(new HeartCrystal(player));
+    roomCEnemy->addItem(new HeartCrystal(player));
+    roomCEnemy->setHealth(2);
+    rooms[2]->setEnemy(roomCEnemy);
+    qDebug() << rooms[2]->enemyInRoom();
+
+    rooms[3]->setDescription("A smelly cupboard with a little spider in the corner.");
+    rooms[3]->addItem(new SkipStone(fightOver, this));
+
+    currentRoom = rooms[0];
+
+    // Set exits for each room
+    rooms[0]->setExits(nullptr, nullptr, rooms[1], nullptr);
+    rooms[1]->setExits(rooms[0], nullptr, rooms[2], nullptr);
+    rooms[2]->setExits(rooms[1], rooms[5], rooms[4], rooms[3]);
+    rooms[3]->setExits(nullptr, rooms[2], nullptr, nullptr);
+    rooms[4]->setExits(rooms[2], rooms[11], nullptr, nullptr);
+    rooms[5]->setExits(nullptr, nullptr, rooms[6], rooms[2]);
+    rooms[6]->setExits(rooms[5], rooms[7], nullptr, nullptr);
+    rooms[7]->setExits(rooms[8], rooms[9], rooms[6], nullptr);
+    rooms[8]->setExits(nullptr, nullptr, rooms[7], nullptr);
+    rooms[9]->setExits(nullptr, rooms[12], rooms[10], rooms[7]);
+    rooms[10]->setExits(rooms[9], nullptr, rooms[11], nullptr);
+    rooms[11]->setExits(rooms[10], nullptr, nullptr, rooms[4]);
+    rooms[12]->setExits(rooms[9], nullptr, rooms[13], nullptr);
+    rooms[13]->setExits(rooms[12], nullptr, nullptr, nullptr);
 }
 
 MainWindow::~MainWindow()

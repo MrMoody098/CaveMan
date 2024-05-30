@@ -55,10 +55,16 @@ private:
     bool fighting = false;
     int currentIndex;
 
+    static const int numRooms = 14;
+    Room* rooms[numRooms];
+
+
+
     // Helper functions
     void setupRooms();
     void setupConnections();
-    void initializeGameState();
+    void initialiseGameState();
+
     void appendText(const QString &text);
     void appendText(const QString &text, int delay);
     void setButtonsEnabled(bool enabled);
@@ -74,16 +80,18 @@ private:
     void challenge(bool condition);
     void handlePlayerChoice(int playerChoice);
     QString determineWinner(int playerChoice, int enemyChoice);
-    void enemyDead();
     void gameOver();
     QString choiceToString(int choice);
     int getItemId(const QString &itemName);
+
+    //implement these
     void transferItemFromRoomToPlayer(int itemId);
     void transferItemFromPlayerToRoom(int itemId);
     void setMovementButtonsEnabled(bool enabled);
     void setCombatButtonsEnabled(bool enabled);
 
-
+protected:
+    void enemyDead();
 };
 
 #endif // MAINWINDOW_H
