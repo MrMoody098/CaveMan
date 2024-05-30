@@ -1,5 +1,13 @@
 <RCC>
     <qresource prefix="/images">
         <file>CaveManMap.png</file>
+        <file>paper.png</file>
+        <file>scissors.png</file>
+        <file>rock.png</file>
+        <file>../../../Downloads/download (1).png</file>
+        <file>../../../Downloads/download (1)_copy.png</file>
+        <file>../../../Downloads/pngegg (2).png</file>
+        <file>../../../Downloads/pngegg.png</file>
+        <file>../../../Downloads/kisspng-8-bit-pixel-donuts-color-depth-pixilart-coin-by-anonymous-5cde0e5bed0227.1253409415580565399708.png</file>
     </qresource>
 </RCC>

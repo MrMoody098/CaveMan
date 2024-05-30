@@ -13,8 +13,13 @@ struct BitStructure {
 class Item
 {
 public:
-    //Constructor
+    //Constructors
     Item( int value,QString description,QString name,int quantity,int id,int isConsumable);
+    Item(const Item& other);
+    Item(Item* other);
+
+
+
     //Release Memeory using descturctor
 
     int getValue();

@@ -4,6 +4,13 @@
 Enemy::Enemy(QString name,QString description) :name(name),description(description), alive(true) {
 }
 
+Enemy::~Enemy() {
+    for (Item* item : items) {
+        delete item;
+    }
+    items.clear();
+}
+
 // Getter method for name
 QString Enemy::getName() {
     return name;
