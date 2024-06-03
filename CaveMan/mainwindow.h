@@ -12,6 +12,12 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+//define my soundsettings union
+union SoundSettings {
+    int intValue;
+    float floatValue;
+    SoundSettings() : intValue(50) {}  // Default constructor initializes intValue to 0
+};
 
 // Forward declaration
 class SkipStone;
@@ -25,10 +31,6 @@ class SkipStone;
 #define DEBUG_LOG(x)
 #endif
 
-
-namespace Ui {
-class MainWindow;
-}
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -58,6 +60,10 @@ private slots:
     void selectedItemChanged(QListWidgetItem *item);
 
 private:
+
+    SoundSettings soundSettings;
+
+
     Ui::MainWindow *ui;
     Player player;
     HeartCrystal heartCrystal;
@@ -104,6 +110,7 @@ private:
 protected:
     void enemyDead();
 };
+
 
 #endif // MAINWINDOW_H
 

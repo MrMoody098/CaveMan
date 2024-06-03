@@ -4,8 +4,7 @@
 #include "item.h"
 
 class MainWindow; // Forward declaration
-
-
+using namespace interactable;
 class SkipStone : public Item {
 public:
     SkipStone(bool &fightOver,MainWindow* mainWindow); // Constructor to initialize fightOver

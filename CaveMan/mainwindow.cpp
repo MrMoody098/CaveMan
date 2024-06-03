@@ -7,9 +7,12 @@
 #include <QScrollBar>
 #include <QRandomGenerator>
 using namespace std;
+
 int APPEND_TIME =10;
 bool fto = true;
 bool &fightOver = fto;
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -34,16 +37,20 @@ MainWindow::MainWindow(QWidget *parent)
 
     appendText(introText, APPEND_TIME);
 
-
 }
 void MainWindow::initialiseGameState(){
+    //intially set to 50 from the default constructor
+    soundSettings.floatValue = 45.5; //changing to a float value
+    soundSettings.intValue = 50;//changing to int value
     // Call the appendText function with the intro text
     player.setHealth(10);
     player.addCoins(1);
     updateStats();
+
     HeartCrystal* hc = &heartCrystal;
     hc->setValues(1, 8, 8);
     player+hc;
+
     updatePlayerItemList();
     currentRoom->addItem(new HeartCrystal(player));
     currentRoom->addItem(new HeartCrystal(player));
@@ -129,6 +136,7 @@ void MainWindow::setupRooms(){
     roomCEnemy->addItem(new HeartCrystal(player));
     roomCEnemy->addItem(new HeartCrystal(player));
     roomCEnemy->setHealth(2);
+    roomCEnemy->addCoins(5);
     rooms[2]->setEnemy(roomCEnemy);
     qDebug() << rooms[2]->enemyInRoom();
 
@@ -308,32 +316,26 @@ void MainWindow::appendText(const QString &text, int delay) {
 }
 
 void MainWindow::setButtonsEnabled(bool enabled) {
-    if(fighting){
+    // Enable or disable all relevant buttons
     ui->NorthButton->setEnabled(enabled);
-
     ui->SouthButton->setEnabled(enabled);
-
     ui->EastButton->setEnabled(enabled);
-
     ui->WestButton->setEnabled(enabled);
-}
     ui->RockButton->setEnabled(enabled);
-
     ui->ScissorsButton->setEnabled(enabled);
-
     ui->PaperButton_3->setEnabled(enabled);
-
     ui->PickupButton->setEnabled(enabled);
     ui->PickupButton->setStyleSheet(enabled ? "" : "background-color: grey;");
-
     ui->UseButton->setEnabled(enabled);
     ui->UseButton->setStyleSheet(enabled ? "" : "background-color: grey;");
-
     ui->InspectButton->setEnabled(enabled);
     ui->InspectButton->setStyleSheet(enabled ? "" : "background-color: grey;");
-
     ui->DropButton->setEnabled(enabled);
     ui->DropButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+    if(!fightOver){ui->FightButton->setEnabled(enabled);};
+    if(!fightOver){ui->FightButton->setStyleSheet(enabled ? "" : "background-color: grey;");};
+    if(!fightOver){ui->FleeButton->setEnabled(enabled);};
+    if(!fightOver){ui->FleeButton->setStyleSheet(enabled ? "" : "background-color: grey;");};
 }
 
 void MainWindow::updateRoomItemList(){
@@ -714,28 +716,38 @@ void MainWindow::handlePlayerChoice(int playerChoice) {
     }
 }
 
-void MainWindow::enemyDead(){
+void MainWindow::enemyDead() {
+    Enemy* enemy = currentRoom->getEnemy();
+    int coinsGained = enemy->getCoins();  // Get the coins from the enemy
+    qDebug() << "Coins gained from enemy:" << coinsGained;
+    player.addCoins(coinsGained);  // Increment the player's coins
+    QString coinMessage = "You have gained " + QString::number(coinsGained) + " coins from defeating the enemy.\n";
 
-    Enemy* enemy =currentRoom->getEnemy();
-    //print you have defeated {enemy} they have dropped {itmes}
+    // Print you have defeated {enemy} they have dropped {items}
     std::vector<Item*> itemsToDrop = enemy->getItems(); // Collect items before modifying the enemy
-    QString output = "You have Defeated" + enemy->getName()+ "\nThe enemy Dropped these items:\n";
+    QString output = "You have defeated " + enemy->getName() + "\nThe enemy dropped these items:\n";
 
     for (Item* i : itemsToDrop) {
         output += i->getName() + " x" + QString::number(i->getQuantity()) + "\n";
         Item* copiedItem = new Item(*i); // Create a copy using the copy constructor
         currentRoom->addItem(copiedItem);
     }
-    delete enemy;
-    fightOver=true;
+
+    fightOver = true;
     currentRoom->setEnemy(nullptr);
     challenge(false);
     ui->stackedWidget->setCurrentIndex(0);
     updateStats();
     updateRoomItemList();
     setButtonsEnabled(true);
+
     appendText(output);
+    appendText(coinMessage);  // Append the message about the gained coins
+
+    delete enemy;
 }
+
+
 
 QString MainWindow::choiceToString(int choice) {
     switch (choice) {

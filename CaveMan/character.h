@@ -3,7 +3,7 @@
 
 #include "item.h" // Include the item header file
 #include <vector>
-
+using namespace interactable;
 class Character {
 public:
     virtual ~Character() = default;
@@ -15,8 +15,7 @@ public:
     void subtractHealth(int amount);
     void addItem(Item* newItem);
     int getNumItems();
-    void addCoins(int);
-    void incCoins(int);
+    void addCoins(int amount);
     int getCoins();
     Item* getItem(int id);
     std::vector<Item*> getItems();
@@ -31,4 +30,6 @@ protected:
     std::vector<Item*> items;
 
 };
+
+
 #endif // CHARACTER_H

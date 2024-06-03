@@ -1,12 +1,12 @@
 #include "item.h"
-#include "itemexception.h".h"
-
+#include "itemexception.h"
+using namespace interactable ;
 Item::Item(int value, QString description, QString name, int quantity, int id, int isConsumable) {
     if (value < 0) {
-        throw InvalidValueException("Value cannot be negative");
+        throw InvalidValueException("Value cant be negative");
     }
     if (quantity < 0) {
-        throw InvalidQuantityException("Quantity cannot be negative");
+        throw InvalidQuantityException("Quantity cant be negative");
     }
     this->setValue(value);
     this->description = description;
@@ -60,14 +60,14 @@ int Item::getValue() {
 
 void Item::setValue(int value) {
     if (value < 0) {
-        throw InvalidValueException("Value cannot be negative");
+        throw InvalidValueException("Value cant be negative");
     }
     bitStruct.value = value;
 }
 
 void Item::setQuantity(int quantity) {
     if (quantity < 0) {
-        throw InvalidQuantityException("Quantity cannot be negative");
+        throw InvalidQuantityException("Quantity cant be negative");
     }
     bitStruct.quantity = quantity;
 }
@@ -78,7 +78,7 @@ int Item::getQuantity() {
 
 void Item::setValues(int quantity, int value, int isConsumable) {
     if (quantity < 0) {
-        throw InvalidQuantityException("Quantity cannot be negative");
+        throw InvalidQuantityException("Quantity cant be negative");
     }
     if (value < 0) {
         throw InvalidValueException("Value cannot be negative");

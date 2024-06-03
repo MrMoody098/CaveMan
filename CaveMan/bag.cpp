@@ -3,19 +3,25 @@
 
 #include <vector>
 #include <iostream>
+#include <algorithm>
+#include "item.h"
+#include "Container.h"
 
 
-//template bag item
 
+// Template bag item
 template <typename T>
-class Bag {
+class Bag : public Item, public Container {
 public:
-    void add(const T& item);
-    void remove(const T& item);
-    bool contains(const T& item) const;
-    void clear();
-    size_t size() const;
-    void print() const;
+    Bag(int value, QString description, QString name, int quantity, int id, int isConsumable)
+        : Item(value, description, name, quantity, id, isConsumable) {}
+
+    void add(const T& item) override;
+    void remove(const T& item) override;
+    bool contains(const T& item) const override;
+    void clear() override;
+    size_t size() const override;
+    void print() const override;
 
 private:
     std::vector<T> items;

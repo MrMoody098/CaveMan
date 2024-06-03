@@ -3,14 +3,16 @@
 
 #include <QMainWindow>
 
+namespace interactable{
+
 struct BitStructure {
     int quantity: 10; // store up to 10 in quantity
     int value: 10;    // store our value of 10
     int isConsumable: 1; // stores isConsumable check
     int id: 3; //store id up to 3
 };
-
 class Item
+
 {
 public:
     //Constructors
@@ -42,4 +44,5 @@ private:
 protected:
     BitStructure bitStruct;
 };
+}
 #endif // ITEM_H

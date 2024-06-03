@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1334</width>
-    <height>817</height>
+    <width>1322</width>
+    <height>724</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,6 +42,9 @@
     </property>
     <property name="mouseTracking">
      <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 0, 0);</string>
     </property>
     <property name="inputMethodHints">
      <set>Qt::ImhNoEditMenu</set>
@@ -93,8 +96,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QLabel" name="Coins">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>100</y>
+       <x>70</x>
+       <y>110</y>
        <width>61</width>
        <height>31</height>
       </rect>
@@ -111,7 +114,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QLabel" name="Health">
      <property name="geometry">
       <rect>
-       <x>150</x>
+       <x>160</x>
        <y>110</y>
        <width>51</width>
        <height>31</height>
@@ -142,8 +145,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QLabel" name="label_4">
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>20</y>
+       <x>110</x>
+       <y>30</y>
        <width>111</width>
        <height>91</height>
       </rect>
@@ -158,8 +161,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>-10</x>
-       <y>20</y>
+       <x>30</x>
+       <y>30</y>
        <width>111</width>
        <height>91</height>
       </rect>
@@ -4160,7 +4163,7 @@ image: url(:/images/Downloads/kisspng-8-bit-pixel-donuts-color-depth-pixilart-co
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QWidget" name="DirectionsStackedWidgetPage1" native="true">
+      <widget class="QWidget" name="DirectionsStackedWidgetPage1">
        <widget class="QPushButton" name="NorthButton">
         <property name="geometry">
          <rect>
@@ -6247,7 +6250,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1334</width>
+     <width>1322</width>
      <height>25</height>
     </rect>
    </property>

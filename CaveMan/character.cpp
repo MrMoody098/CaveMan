@@ -1,5 +1,4 @@
 #include "character.h"
-
 // Member function implementations
 int Character::getHealth() {
     return health;
@@ -59,8 +58,8 @@ int Character::getNumItems() {
     return items.size();
 }
 
-void Character::addCoins(int coins){
-    this->coins+=coins;
+void Character::addCoins(int amount){
+    coins+=amount;
 }
 
 int Character::getCoins(){
