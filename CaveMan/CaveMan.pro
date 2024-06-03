@@ -1,8 +1,9 @@
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
+
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -10,8 +11,8 @@ CONFIG += c++17
 
 SOURCES += \
     Character.cpp \
+    bag.cpp \
     enemy.cpp \
-    gamemanager.cpp \
     heartcrystal.cpp \
     item.cpp \
     main.cpp \
@@ -22,10 +23,12 @@ SOURCES += \
 
 HEADERS += \
     Character.h \
+    bag.h \
+    container.h \
     enemy.h \
-    gamemanager.h \
     heartcrystal.h \
     item.h \
+    itemexception.h \
     mainwindow.h \
     player.h \
     room.h \

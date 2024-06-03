@@ -3,9 +3,9 @@
 
 #include "item.h"
 #include "player.h"
+using namespace interactable;
 
 // Definition of BitStructure
-
 class HeartCrystal : public Item  {
 public:
     // Constructor

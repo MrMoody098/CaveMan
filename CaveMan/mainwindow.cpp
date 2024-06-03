@@ -7,83 +7,64 @@
 #include <QScrollBar>
 #include <QRandomGenerator>
 using namespace std;
+
 int APPEND_TIME =10;
 bool fto = true;
 bool &fightOver = fto;
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     player(),
     heartCrystal(player),
     currentRoom(nullptr),
-    lastRoom(nullptr){ // Initialize currentRoom pointer to nullptr
-    ui->setupUi(this);
-    bool fto = true;
-    bool &fightOver = fto;
-    //add a pointer to the heartCrystal
-    // Load the map image
-    QPixmap image("C:/Users/ticta/OneDrive/Desktop/CaveManMap.png");
+    lastRoom(nullptr){
 
-    // Initialize the countdown timer
-    // Make the QTextEdit widget read-only
+    ui->setupUi(this);
+
     ui->OutputBox->setReadOnly(true);
     ui->OutputBox->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
-    // Initialize intro text and other variables
-    introText = "Welcome to CaveMan's Descent!\n\n"
-                "CaveMan, a fearless explorer of caves, finds himself plunging into darkness after slipping down a mineshaft during one of his usual adventures.\n\n"
-                "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
-                "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
+    setupRooms();
+    setupConnections();
+    initialiseGameState();
 
-    // Create rooms dynamically
-    Room* roomA = new Room("A");
-    Room* roomB = new Room("B");
-    roomB->setDescription("A dusty hallway");
-    roomB->addItem(new SkipStone(fightOver));
-    Room* roomC = new Room("C");
-    roomC->setDescription("A large mineshaft.");
-    Enemy* roomCEnemy = new Enemy("Chris the cryptid","\n a legendary creature rumored to lurk in the depths of dark forests and misty swamps.");
-    roomCEnemy->addItem( new HeartCrystal(player));
-    roomCEnemy->addItem( new HeartCrystal(player));
-    roomCEnemy->setHealth(2);
-    roomC->setEnemy(roomCEnemy);
-    qDebug() << roomC->enemyInRoom();
+    QString introText = "Welcome to CaveMan's Descent!\n\n"
+                        "CaveMan, a fearless explorer of caves, finds himself plunging into darkness after slipping down a mineshaft during one of his usual adventures.\n\n"
+                        "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
+                        "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
 
-    Room* roomD = new Room("D");
-    roomD->setDescription("A smelly cubbord there is a little spider in the corner.");
-    roomD->addItem(new SkipStone(fightOver));
+    appendText(introText, APPEND_TIME);
 
+}
+void MainWindow::initialiseGameState(){
+    //intially set to 50 from the default constructor
+    soundSettings.floatValue = 45.5; //changing to a float value
+    soundSettings.intValue = 50;//changing to int value
+    // Call the appendText function with the intro text
+    player.setHealth(10);
+    player.addCoins(1);
+    updateStats();
 
-    Room* roomE = new Room("E");
-    Room* roomF = new Room("F");
-    Room* roomG = new Room("G");
-    Room* roomH = new Room("H");
-    Room* roomI = new Room("I");
-    Room* roomJ = new Room("J");
-    Room* roomK = new Room("K");
-    Room* roomL = new Room("L");
-    Room* roomM = new Room("M");
-    Room* roomN = new Room("N");
+    HeartCrystal* hc = &heartCrystal;
+    hc->setValues(1, 8, 8);
+    player+hc;
 
-    currentRoom = roomA;
-    // Set exits for each room
-    roomA->setExits(nullptr, nullptr, roomB, nullptr);
-    roomB->setExits(roomA, nullptr, roomC, nullptr);
-    roomC->setExits(roomB, roomF, roomE, roomD);
-    roomD->setExits(nullptr, roomC, nullptr, nullptr);
-    roomE->setExits(roomC, roomL, nullptr, nullptr);
-    roomF->setExits(nullptr, nullptr, roomG, roomC);
-    roomG->setExits(roomF, roomH, nullptr, nullptr);
-    roomH->setExits(roomI, roomJ, roomG, nullptr);
-    roomI->setExits(nullptr, nullptr, roomH, nullptr);
-    roomJ->setExits(nullptr, roomM, roomK, roomH);
-    roomK->setExits(roomJ,nullptr,roomL,nullptr);
-    roomL->setExits(roomK,nullptr,nullptr,roomE);
-    roomM->setExits(roomJ,nullptr,roomN,nullptr);
-    roomN->setExits(roomM,nullptr,nullptr,nullptr);
+    updatePlayerItemList();
+    currentRoom->addItem(new HeartCrystal(player));
+    currentRoom->addItem(new HeartCrystal(player));
+    currentRoom->addItem(new SkipStone(fightOver,this));
+    updateRoomItemList();
+    // Set selection mode to allow only one item to be selected at a time
+    ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->RoomList->setSelectionMode(QAbstractItemView::SingleSelection);
+    updateDirectionButtons();
 
+    DEBUG_LOG("game initialised.");
 
-
+}
+void MainWindow::setupConnections(){
     // Connect signals and slots
 
     connect(ui->PickupButton, &QPushButton::clicked, this, &MainWindow::pickupButtonClicked);
@@ -127,25 +108,60 @@ MainWindow::MainWindow(QWidget *parent)
             updateCurrentRoom();
         }
     });
+    DEBUG_LOG("Connections setup complete.");
 
-    // Call the appendText function with the intro text
-    player.setHealth(10);
-    player.addCoins(1);
-    appendText(introText, APPEND_TIME);
-    updateStats();
-    HeartCrystal* hc = &heartCrystal;
-    hc->setValues(1, 8, 8);
-    player.addItem(hc);
-    updatePlayerItemList();
-    currentRoom->addItem(new HeartCrystal(player));
-    currentRoom->addItem(new HeartCrystal(player));
-    currentRoom->addItem(new SkipStone(fightOver));
-    updateRoomItemList();
-    // Set selection mode to allow only one item to be selected at a time
-    ui->PlayerList->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->RoomList->setSelectionMode(QAbstractItemView::SingleSelection);
-    updateDirectionButtons();
+}
+void MainWindow::setupRooms(){
+    // Create rooms dynamically and store them in the array
+    rooms[0] = new Room("A");
+    rooms[1] = new Room("B");
+    rooms[2] = new Room("C");
+    rooms[3] = new Room("D");
+    rooms[4] = new Room("E");
+    rooms[5] = new Room("F");
+    rooms[6] = new Room("G");
+    rooms[7] = new Room("H");
+    rooms[8] = new Room("I");
+    rooms[9] = new Room("J");
+    rooms[10] = new Room("K");
+    rooms[11] = new Room("L");
+    rooms[12] = new Room("M");
+    rooms[13] = new Room("N");
 
+    rooms[1]->setDescription("A dusty hallway");
+    rooms[1]->addItem(new SkipStone(fightOver, this));
+
+    rooms[2]->setDescription("A large mineshaft.");
+    Enemy* roomCEnemy = new Enemy("Chris the cryptid", "\n a legendary creature rumored to lurk in the depths of dark forests and misty swamps.");
+    roomCEnemy->addItem(new HeartCrystal(player));
+    roomCEnemy->addItem(new HeartCrystal(player));
+    roomCEnemy->setHealth(2);
+    roomCEnemy->addCoins(5);
+    rooms[2]->setEnemy(roomCEnemy);
+    qDebug() << rooms[2]->enemyInRoom();
+
+    rooms[3]->setDescription("A smelly cupboard with a little spider in the corner.");
+    rooms[3]->addItem(new SkipStone(fightOver, this));
+
+    currentRoom = rooms[0];
+
+    // Set exits for each room
+    rooms[0]->setExits(nullptr, nullptr, rooms[1], nullptr);
+    rooms[1]->setExits(rooms[0], nullptr, rooms[2], nullptr);
+    rooms[2]->setExits(rooms[1], rooms[5], rooms[4], rooms[3]);
+    rooms[3]->setExits(nullptr, rooms[2], nullptr, nullptr);
+    rooms[4]->setExits(rooms[2], rooms[11], nullptr, nullptr);
+    rooms[5]->setExits(nullptr, nullptr, rooms[6], rooms[2]);
+    rooms[6]->setExits(rooms[5], rooms[7], nullptr, nullptr);
+    rooms[7]->setExits(rooms[8], rooms[9], rooms[6], nullptr);
+    rooms[8]->setExits(nullptr, nullptr, rooms[7], nullptr);
+    rooms[9]->setExits(nullptr, rooms[12], rooms[10], rooms[7]);
+    rooms[10]->setExits(rooms[9], nullptr, rooms[11], nullptr);
+    rooms[11]->setExits(rooms[10], nullptr, nullptr, rooms[4]);
+    rooms[12]->setExits(rooms[9], nullptr, rooms[13], nullptr);
+    rooms[13]->setExits(rooms[12], nullptr, nullptr, nullptr);
+
+    DEBUG_LOG("Setup rooms complete.");
 
 }
 
@@ -208,8 +224,8 @@ void MainWindow::selectedItemChanged(QListWidgetItem *item)
     else if(item->text().contains("SkipStone") )
     {
         ui->InspectButton->setStyleSheet("background-color: red; color: white;");
+        if(!fightOver)ui->UseButton->setStyleSheet("background-color: red; color: white;");
 
-        ui->UseButton->setStyleSheet("background-color: red; color: white;");
         ui->DropButton->setStyleSheet("background-color: red; color: white;");
 
         // Reset the color of the PickupButton to its default
@@ -300,26 +316,26 @@ void MainWindow::appendText(const QString &text, int delay) {
 }
 
 void MainWindow::setButtonsEnabled(bool enabled) {
-    if(!fighting){
+    // Enable or disable all relevant buttons
     ui->NorthButton->setEnabled(enabled);
-
     ui->SouthButton->setEnabled(enabled);
-
     ui->EastButton->setEnabled(enabled);
-
     ui->WestButton->setEnabled(enabled);
-}
+    ui->RockButton->setEnabled(enabled);
+    ui->ScissorsButton->setEnabled(enabled);
+    ui->PaperButton_3->setEnabled(enabled);
     ui->PickupButton->setEnabled(enabled);
     ui->PickupButton->setStyleSheet(enabled ? "" : "background-color: grey;");
-
     ui->UseButton->setEnabled(enabled);
     ui->UseButton->setStyleSheet(enabled ? "" : "background-color: grey;");
-
     ui->InspectButton->setEnabled(enabled);
     ui->InspectButton->setStyleSheet(enabled ? "" : "background-color: grey;");
-
     ui->DropButton->setEnabled(enabled);
     ui->DropButton->setStyleSheet(enabled ? "" : "background-color: grey;");
+    if(!fightOver){ui->FightButton->setEnabled(enabled);};
+    if(!fightOver){ui->FightButton->setStyleSheet(enabled ? "" : "background-color: grey;");};
+    if(!fightOver){ui->FleeButton->setEnabled(enabled);};
+    if(!fightOver){ui->FleeButton->setStyleSheet(enabled ? "" : "background-color: grey;");};
 }
 
 void MainWindow::updateRoomItemList(){
@@ -490,7 +506,7 @@ void MainWindow::dropButtonClicked()
                     if(player.getItem(itemId)->getQuantity()==0){return;}
                         player.getItem(itemId)->decQuantity();
                         if(itemId==1){currentRoom->addItem(new HeartCrystal(player));};
-                        if(itemId==2){currentRoom->addItem(new SkipStone(fightOver));};
+                        if(itemId==2){currentRoom->addItem(new SkipStone(fightOver,this));};
 
                 }
             }
@@ -554,6 +570,7 @@ void MainWindow::flee(){
 
 void MainWindow::fight(){
     fightOver = false;
+    fighting = true;
     Enemy* enemy = currentRoom->getEnemy();
     QString output ="\n\n------------------\n\n"+enemy->getName()+": \"On the Count of Three Shoot\"";
     appendText(output,APPEND_TIME);
@@ -634,7 +651,7 @@ void MainWindow::pickupButtonClicked()
                 if(skipStone)
                 {
                     // Add the SkipStone to the player's inventory
-                    player.addItem(new SkipStone(fightOver));
+                    player.addItem(new SkipStone(fightOver,this));
                     updateStats();
                     // Decrement the SkipStone's quantity in the room if it's greater than 0
                     if(skipStone->getQuantity() > 0)
@@ -685,6 +702,7 @@ void MainWindow::handlePlayerChoice(int playerChoice) {
 
     if (result == "Player wins!") {
         currentRoom->getEnemy()->subtractHealth(1); //
+        updateStats();
         if (currentRoom->getEnemy()->getHealth() <= 0) {
             enemyDead();
         }
@@ -698,29 +716,38 @@ void MainWindow::handlePlayerChoice(int playerChoice) {
     }
 }
 
-void MainWindow::enemyDead(){
-    Enemy* enemy =currentRoom->getEnemy();
-    //print you have defeated {enemy} they have dropped {itmes}
-    appendText("You have Defeated" + enemy->getName());
-    appendText("The enemy Dropped these items:");
+void MainWindow::enemyDead() {
+    Enemy* enemy = currentRoom->getEnemy();
+    int coinsGained = enemy->getCoins();  // Get the coins from the enemy
+    qDebug() << "Coins gained from enemy:" << coinsGained;
+    player.addCoins(coinsGained);  // Increment the player's coins
+    QString coinMessage = "You have gained " + QString::number(coinsGained) + " coins from defeating the enemy.\n";
+
+    // Print you have defeated {enemy} they have dropped {items}
     std::vector<Item*> itemsToDrop = enemy->getItems(); // Collect items before modifying the enemy
+    QString output = "You have defeated " + enemy->getName() + "\nThe enemy dropped these items:\n";
 
     for (Item* i : itemsToDrop) {
-        appendText(i->getName());
+        output += i->getName() + " x" + QString::number(i->getQuantity()) + "\n";
         Item* copiedItem = new Item(*i); // Create a copy using the copy constructor
         currentRoom->addItem(copiedItem);
     }
 
-    delete enemy ;
-
-    fightOver=true;
+    fightOver = true;
     currentRoom->setEnemy(nullptr);
     challenge(false);
     ui->stackedWidget->setCurrentIndex(0);
     updateStats();
     updateRoomItemList();
     setButtonsEnabled(true);
+
+    appendText(output);
+    appendText(coinMessage);  // Append the message about the gained coins
+
+    delete enemy;
 }
+
+
 
 QString MainWindow::choiceToString(int choice) {
     switch (choice) {

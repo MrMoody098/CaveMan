@@ -3,24 +3,23 @@
 
 #include <QMainWindow>
 
+namespace interactable{
+
 struct BitStructure {
     int quantity: 10; // store up to 10 in quantity
     int value: 10;    // store our value of 10
     int isConsumable: 1; // stores isConsumable check
     int id: 3; //store id up to 3
 };
-
 class Item
+
 {
 public:
     //Constructors
     Item( int value,QString description,QString name,int quantity,int id,int isConsumable);
     Item(const Item& other);
     Item(Item* other);
-
-
-
-    //Release Memeory using descturctor
+    Item& operator=(const Item& other); // Assignment operator
 
     int getValue();
     QString getDescription();
@@ -45,4 +44,5 @@ private:
 protected:
     BitStructure bitStruct;
 };
+}
 #endif // ITEM_H

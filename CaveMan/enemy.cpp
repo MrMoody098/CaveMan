@@ -1,7 +1,7 @@
 #include "enemy.h"
 
 // Constructor
-Enemy::Enemy(QString name,QString description) :name(name),description(description), alive(true) {
+Enemy::Enemy(QString name,QString description) :Character(), name(name),description(description), alive(true) {
 }
 
 Enemy::~Enemy() {

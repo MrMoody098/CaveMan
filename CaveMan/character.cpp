@@ -1,5 +1,4 @@
 #include "character.h"
-
 // Member function implementations
 int Character::getHealth() {
     return health;
@@ -19,6 +18,11 @@ void Character::subtractHealth(int amount) {
     } else {
         health = 0;
     }
+}
+// Operator overload for adding an item to the inventory
+Character& Character::operator+(Item* newItem) {
+    this->addItem(newItem);
+    return *this;
 }
 
 Item* Character::getItem(int id){
@@ -54,8 +58,8 @@ int Character::getNumItems() {
     return items.size();
 }
 
-void Character::addCoins(int coins){
-    this->coins+=coins;
+void Character::addCoins(int amount){
+    coins+=amount;
 }
 
 int Character::getCoins(){
