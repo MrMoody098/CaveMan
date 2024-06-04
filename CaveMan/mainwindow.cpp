@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     QString introText = "Welcome to CaveMan's Descent!\n\n"
                         "CaveMan, a fearless explorer of caves, finds himself plunging into darkness after slipping down a mineshaft during one of his usual adventures.\n\n"
                         "Now trapped deep underground, he must fight his way past creatures using rock-paper-scissors combat, collect clues and items, and rely on his wits to escape.\n\n"
-                        "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n";
+                        "Armed with determination and a trusty rock, CaveMan faces the ultimate challenge: finding a way back to the surface before it's too late.\n You awaken in "+currentRoom->getName();
 
     appendText(introText, APPEND_TIME);
 
@@ -165,10 +165,12 @@ void MainWindow::setupRooms(){
 
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 
+    for (Room* room : rooms) {
+        delete room;
+    }
 }
 
 void MainWindow::roomSelectedItemChanged(QListWidgetItem *item){
@@ -441,7 +443,7 @@ bool MainWindow::goDirection(QString direction) {
             challenge(true);
         }
         else{
-            appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
+            appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),APPEND_TIME);
         }
         return true; // Return true to indicate successful direction change
     } else {
@@ -559,7 +561,7 @@ void MainWindow::flee(){
         currentRoom = lastRoom;
         updateCurrentRoom();        // Update the UI to display the new current room
         updateRoomItemList();
-        appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),10);
+        appendText(currentRoom->getDescription() + currentRoom->itemListToQString(),APPEND_TIME);
         fighting = false;
         challenge(false);
 

@@ -63,7 +63,6 @@ private:
 
     SoundSettings soundSettings;
 
-
     Ui::MainWindow *ui;
     Player player;
     HeartCrystal heartCrystal;
@@ -101,11 +100,7 @@ private:
     QString choiceToString(int choice);
     int getItemId(const QString &itemName);
 
-    //implement these
-    void transferItemFromRoomToPlayer(int itemId);
-    void transferItemFromPlayerToRoom(int itemId);
-    void setMovementButtonsEnabled(bool enabled);
-    void setCombatButtonsEnabled(bool enabled);
+
 
 protected:
     void enemyDead();

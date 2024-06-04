@@ -1,56 +1,25 @@
-// // GameManager.cpp
-// #include "GameManager.h"
+#ifndef GAMEMANAGER_H
+#define GAMEMANAGER_H
 
-// GameManager::GameManager(QObject* parent) : QObject(parent), currentIndex(0), currentRoom(nullptr) {
-//     // Initialize game components
-//     initializeGame();
-// }
+#include <vector>
+#include "room.h"
+#include "player.h"
+#include "item.h"
 
-// GameManager::~GameManager() {
-//     // Cleanup resources
-// }
+class GameManager {
+public:
+    GameManager();
+    void setupRooms();
+    void initializeGameState(Player& player);
+    void updatePlayerStats(Player& player);
+    Room* getCurrentRoom();
+    void setCurrentRoom(Room* room);
+    Room* navigateToRoom(const QString& direction);
 
-// void GameManager::startGame() {
-//     // Start the game loop
-//     // Example: connect UI buttons to corresponding slots
-// }
+private:
+    std::vector<Room*> rooms;
+    Room* currentRoom;
+    Room* lastRoom;
+};
 
-// void GameManager::initializeGame() {
-//     // Initialize rooms, player, items, UI setup, etc.
-// }
-
-// void GameManager::updatePlayerItemList() {
-//     // Update player's inventory in the UI
-// }
-
-// void GameManager::updateRoomItemList() {
-//     // Update room's inventory in the UI
-// }
-
-// void GameManager::updateStats() {
-//     // Update player's stats in the UI
-// }
-
-// void GameManager::updateCurrentRoom() {
-//     // Update current room display in the UI
-// }
-
-// void GameManager::goDirection(QString direction) {
-//     // Handle player movement
-// }
-
-// void GameManager::useButtonClicked() {
-//     // Handle use button click
-// }
-
-// void GameManager::pickupButtonClicked() {
-//     // Handle pickup button click
-// }
-
-// void GameManager::roomSelectedItemChanged(QListWidgetItem *item) {
-//     // Handle room list item selection change
-// }
-
-// void GameManager::selectedItemChanged(QListWidgetItem *item) {
-//     // Handle player inventory item selection change
-// }
+#endif // GAMEMANAGER_H

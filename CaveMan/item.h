@@ -18,7 +18,7 @@ public:
     //Constructors
     Item( int value,QString description,QString name,int quantity,int id,int isConsumable);
     Item(const Item& other);
-    Item(Item* other);
+    Item(Item& other);
     Item& operator=(const Item& other); // Assignment operator
 
     int getValue();

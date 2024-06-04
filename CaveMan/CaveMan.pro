@@ -13,6 +13,7 @@ SOURCES += \
     Character.cpp \
     bag.cpp \
     enemy.cpp \
+    gamemanager.cpp \
     heartcrystal.cpp \
     item.cpp \
     main.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     bag.h \
     container.h \
     enemy.h \
+    gamemanager.h \
     heartcrystal.h \
     item.h \
     itemexception.h \
