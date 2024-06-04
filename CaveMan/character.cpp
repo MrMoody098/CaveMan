@@ -36,7 +36,7 @@ Item* Character::getItem(int id){
 }
 
 void Character::addItem(Item* newItem) {
-    Item* inv= getItem(newItem->getId());
+    Item* inv = getItem(newItem->getId());
     if(inv){
         inv->setQuantity( (newItem->getQuantity()) +(inv->getQuantity()) );
 
