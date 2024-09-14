@@ -2,8 +2,8 @@
   
   CaveMan is a Zork-like adventure game developed using Qt, where players explore a series of interconnected caves, engage in combat with enemies using a rock-paper-scissors mechanic, and collect items to aid their journey. 
   The ultimate goal is to escape the caves by defeating enemies, solving puzzles, and collecting clues.
-**
-Features**
+**Features**
+
   Exploration: Navigate through a series of rooms, each with unique descriptions and items.
   
   Combat: Engage in battles with enemies using a rock-paper-scissors combat system.
@@ -18,8 +18,8 @@ Features**
 
 To set up CaveMan on your local machine, follow these steps:
 
-**Clone the Repository:
-**  
+**Clone the Repository:**  
+
   git clone https://github.com/your-username/CaveMan.git
   cd CaveMan
   Open with Qt Creator:
@@ -28,18 +28,15 @@ To set up CaveMan on your local machine, follow these steps:
   Select File -> Open File or Project....
   Navigate to the CaveMan directory and open CaveMan.pro.
   
-**Build the Project:
-**  
+**Build the Project:**
+
   Configure the project to use your preferred Qt version and compiler.
   Click the Build button to compile the project.
   Run the Game:
   
   Once the project is built, click the Run button to start the game.
 
-**Gameplay
-**
-****Controls
-****  
+**Gameplay**
   Movement: Use the direction buttons (North, South, East, West) to navigate between rooms.
   
   Interactions: Use the buttons to pick up items, inspect items, use items, and engage in combat.
@@ -47,8 +44,7 @@ To set up CaveMan on your local machine, follow these steps:
   Combat: Choose Rock, Paper, or Scissors to fight enemies.
 
 
-**Combat System
-**
+**Combat System**
   
   Rock, Paper, Scissors: The combat system is based on the classic game of rock-paper-scissors.
   
